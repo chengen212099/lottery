@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#5a0606">
+<title>尾牙抽獎</title>
+<style>
+:root{
+  --bg1:#8a0e0e; --bg2:#2a0303; --gold:#ffd36b; --gold2:#e8a530;
+  --text:#fff6e0; --muted:#e9c9a0; --cardText:#b01313;
+  --panel:#3a0707; --line:rgba(255,211,107,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:radial-gradient(ellipse at 50% 0%,var(--bg1),var(--bg2) 75%);
+  background-color:var(--bg2);
+  color:var(--text);
+  font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC","Heiti TC",sans-serif;
+  overflow:hidden; user-select:none; -webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent; overscroll-behavior:none;
+}
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px}
+h1{margin:0;font-size:clamp(26px,4.2vw,64px);color:var(--gold);letter-spacing:.12em;
+  text-shadow:0 3px 0 #5a0000,0 0 24px rgba(255,200,80,.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tools{display:flex;gap:8px;flex-shrink:0}
+.btn{font:inherit;cursor:pointer;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--text);
+  border-radius:10px;padding:8px 14px;font-size:clamp(14px,1.3vw,18px)}
+.btn:hover{background:rgba(255,211,107,.15)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.gold{background:linear-gradient(#ffe08a,#e8a530);color:#6a0a0a;border-color:#ffe9a8;font-weight:700}
+
+#stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;min-height:0;padding:10px}
+#cards{display:flex;flex-wrap:wrap;justify-content:center;align-content:center}
+.card{
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(#fffdf5,#ffe6ad);color:var(--cardText);
+  border:.04em solid var(--gold2);border-radius:.12em;
+  box-shadow:0 .04em 0 #9a5b00,0 .08em .25em rgba(0,0,0,.45),inset 0 0 0 .02em #fff;
+  font-weight:900;line-height:1;font-variant-numeric:tabular-nums;
+  font-family:"Arial Black","Helvetica Neue",Arial,"Microsoft JhengHei",sans-serif;
+}
+.card.idle{color:#d8a35a}
+.card.rolling{color:#c54a4a}
+.card.hit{animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+#msg{position:absolute;bottom:4px;left:0;right:0;text-align:center;color:var(--muted);font-size:clamp(14px,1.6vw,22px)}
+
+footer{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 20px 18px;flex-wrap:wrap}
+.status{font-size:clamp(15px,1.6vw,24px);color:var(--muted)}
+.status b{color:var(--gold);font-size:1.25em}
+.stepper{display:flex;align-items:center;gap:8px;font-size:clamp(15px,1.6vw,22px)}
+.stepper .btn{width:2.2em;height:2.2em;padding:0;font-size:1em}
+.stepper output{min-width:2ch;text-align:center;font-weight:700;color:var(--gold);font-size:1.3em}
+#drawBtn{font-size:clamp(24px,3vw,44px);padding:.3em 1.6em;border-radius:.5em;letter-spacing:.2em;
+  box-shadow:0 .12em 0 #8a4a00,0 0 30px rgba(255,200,80,.35)}
+#drawBtn:active:not(:disabled){transform:translateY(.08em);box-shadow:0 .04em 0 #8a4a00}
+.right{display:flex;align-items:center;gap:16px}
+
+/* drawer */
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(420px,92vw);background:var(--panel);border-left:1px solid var(--line);
+  transform:translateX(100%);transition:transform .25s;z-index:20;display:flex;flex-direction:column;box-shadow:-10px 0 30px rgba(0,0,0,.5)}
+.drawer.open{transform:none}
+.drawer h2,.modal h2{margin:0;color:var(--gold);font-size:22px}
+.dhead{display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid var(--line)}
+#histList{flex:1;overflow:auto;margin:0;padding:8px 16px;list-style:none;user-select:text;-webkit-user-select:text}
+#histList li{padding:10px 0;border-bottom:1px dashed var(--line)}
+#histList .rt{font-size:14px;color:var(--muted);margin-bottom:6px}
+.chip{display:inline-block;background:#fff3d0;color:var(--cardText);font-weight:800;border-radius:6px;padding:2px 8px;margin:2px;font-variant-numeric:tabular-nums;font-size:18px}
+.dfoot{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:30;display:none;align-items:center;justify-content:center;padding:16px}
+.mask.open{display:flex}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;width:min(520px,100%);max-height:100%;overflow:auto;padding:20px}
+.field{margin:14px 0}
+.field label{display:block;margin-bottom:6px;color:var(--muted);font-size:15px}
+.field input[type=text],.field input[type=number],.field textarea{width:100%;font:inherit;font-size:17px;padding:8px 10px;border-radius:8px;
+  border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--text);user-select:text;-webkit-user-select:text}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.check{display:flex;align-items:center;gap:8px;margin:10px 0;font-size:16px;cursor:pointer}
+.check input{width:20px;height:20px}
+.hint{font-size:13px;color:var(--muted);margin-top:4px}
+.mfoot{display:flex;justify-content:space-between;gap:8px;margin-top:18px;flex-wrap:wrap}
+
+#toast{position:fixed;left:50%;top:20px;transform:translateX(-50%);background:#fff3d0;color:#6a0a0a;padding:10px 18px;border-radius:10px;
+  font-weight:700;z-index:50;opacity:0;transition:opacity .25s;pointer-events:none}
+#toast.show{opacity:1}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:10}
+
+@media (max-width:640px){
+  header,footer{padding-left:16px;padding-right:16px}
+  footer{justify-content:center}
+  .right{width:100%;justify-content:space-between}
+  .tools .btn{padding:6px 10px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1 id="title">尾牙抽獎</h1>
+    <div class="tools">
+      <button class="btn" id="histBtn" title="快捷鍵 H">紀錄</button>
+      <button class="btn" id="setBtn">設定</button>
+      <button class="btn" id="fsBtn" title="快捷鍵 F">全螢幕</button>
+    </div>
+  </header>
+
+  <div id="stage">
+    <div id="cards"></div>
+    <div id="msg"></div>
+  </div>
+
+  <footer>
+    <div class="status" id="status"></div>
+    <div class="right">
+      <div class="stepper">每次抽
+        <button class="btn" id="minus" aria-label="減少">−</button>
+        <output id="per">1</output>
+        <button class="btn" id="plus" aria-label="增加">＋</button>個
+      </div>
+      <button class="btn gold" id="drawBtn" title="快捷鍵 空白鍵 / Enter">抽獎</button>
+    </div>
+  </footer>
+</div>
+
+<aside class="drawer" id="drawer">
+  <div class="dhead"><h2>抽獎紀錄</h2><button class="btn" id="closeHist">關閉</button></div>
+  <ul id="histList"></ul>
+  <div class="dfoot">
+    <button class="btn" id="copyBtn">複製結果</button>
+    <button class="btn" id="undoBtn">復原上一輪</button>
+  </div>
+</aside>
+
+<div class="mask" id="setMask">
+  <div class="modal">
+    <h2>設定</h2>
+    <div class="field"><label for="fTitle">標題</label><input type="text" id="fTitle"></div>
+    <div class="row2">
+      <div class="field"><label for="fMin">起始號碼</label><input type="number" id="fMin" inputmode="numeric"></div>
+      <div class="field"><label for="fMax">結束號碼</label><input type="number" id="fMax" inputmode="numeric"></div>
+    </div>
+    <div class="field">
+      <label for="fEx">排除號碼（缺席、不參加）</label>
+      <textarea id="fEx" rows="2" placeholder="例：5, 8, 20-25"></textarea>
+      <div class="hint">用逗號或空白分隔，可用 20-25 表示範圍</div>
+    </div>
+    <label class="check"><input type="checkbox" id="fPad">號碼補零顯示（例：007）</label>
+    <label class="check"><input type="checkbox" id="fRepeat">已中獎號碼可再次被抽中</label>
+    <label class="check"><input type="checkbox" id="fSound">音效</label>
+    <div class="mfoot">
+      <button class="btn" id="resetBtn">清除所有紀錄</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn" id="cancelSet">取消</button>
+        <button class="btn gold" id="saveSet">儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<canvas id="fx"></canvas>
+<div id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+const KEY='weiya-lottery-v1';
+const MAX_RANGE=100000, MAX_PER=30;
+const DEF={title:'尾牙抽獎',min:1,max:100,per:1,exclude:'',pad:true,repeat:false,sound:true,cycle:1,history:[]};
+const $=id=>document.getElementById(id);
+
+let S=load();
+let busy=false;
+
+function load(){
+  try{const r=JSON.parse(localStorage.getItem(KEY)); if(r&&typeof r==='object') return Object.assign({},DEF,r,{history:Array.isArray(r.history)?r.history:[]});}catch(e){}
+  return Object.assign({},DEF,{history:[]});
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+function parseList(str){
+  const set=new Set();
+  for(const tok of String(str).split(/[\s,，、;；]+/)){
+    if(!tok) continue;
+    const m=tok.match(/^(\d+)[-~～](\d+)$/);
+    if(m){let a=+m[1],b=+m[2]; if(a>b)[a,b]=[b,a]; if(b-a>MAX_RANGE) continue; for(let i=a;i<=b;i++) set.add(i);}
+    else if(/^\d+$/.test(tok)) set.add(+tok);
+  }
+  return set;
+}
+function cyc(h){return h.cycle||1;}
+// 只計算「本回」抽過的號碼；進入下一回時所有號碼重新加入
+function drawnSet(){const s=new Set(); for(const h of S.history) if(cyc(h)===S.cycle) for(const n of h.nums) s.add(n); return s;}
+function getPool(){
+  const ex=parseList(S.exclude), dr=S.repeat?new Set():drawnSet(), p=[];
+  for(let i=S.min;i<=S.max;i++) if(!ex.has(i)&&!dr.has(i)) p.push(i);
+  return p;
+}
+function totalCount(){const ex=parseList(S.exclude); let c=0; for(let i=S.min;i<=S.max;i++) if(!ex.has(i)) c++; return c;}
+
+// 公平亂數：crypto + 拒絕取樣，避免取餘數偏差
+function randInt(n){
+  const a=new Uint32Array(1), lim=Math.floor(0x100000000/n)*n; let x;
+  do{crypto.getRandomValues(a); x=a[0];}while(x>=lim);
+  return x%n;
+}
+function pick(pool,k){
+  const p=pool.slice();
+  for(let i=0;i<k;i++){const j=i+randInt(p.length-i); [p[i],p[j]]=[p[j],p[i]];}
+  return p.slice(0,k);
+}
+function fmt(n){return S.pad?String(n).padStart(String(S.max).length,'0'):String(n);}
+
+/* ---------- 版面 ---------- */
+const cardsEl=$('cards'), stage=$('stage');
+function digits(){return Math.max(String(S.max).length,1);}
+function layout(){
+  const k=cardsEl.children.length||1, r=stage.getBoundingClientRect();
+  const W=r.width-24, H=r.height-40, d=digits(), ratio=d*0.72+0.5;
+  let best=0,bc=1,bg=0;
+  for(let c=1;c<=k;c++){
+    const rows=Math.ceil(k/c), gap=Math.min(W,H)*0.035;
+    const cw=(W-gap*(c-1))/c, ch=(H-gap*(rows-1))/rows;
+    const fs=Math.min(cw/ratio, ch/1.3);
+    if(fs>best){best=fs;bc=c;bg=gap;}
+  }
+  best=Math.max(12,best);
+  const cw=best*ratio, ch=best*1.3;
+  cardsEl.style.gap=bg+'px';
+  cardsEl.style.maxWidth=(bc*cw+(bc-1)*bg+1)+'px';
+  for(const el of cardsEl.children){el.style.fontSize=best+'px';el.style.width=cw+'px';el.style.height=ch+'px';}
+}
+function setCards(values,cls){
+  cardsEl.innerHTML='';
+  for(const v of values){const d=document.createElement('div'); d.className='card '+(cls||''); d.textContent=v; cardsEl.appendChild(d);}
+  layout();
+}
+function showIdle(){
+  const last=S.history[S.history.length-1];
+  if(last&&cyc(last)===S.cycle){setCards(last.nums.map(fmt)); $('msg').textContent=resultMsg(last);}
+  else{setCards(Array(S.per).fill('?'),'idle');
+    $('msg').textContent=S.cycle>1?'第 '+S.cycle+' 回開始：所有號碼重新加入，按「抽獎」繼續':'按「抽獎」或空白鍵開始';}
+}
+function resultMsg(h){
+  const left=getPool().length;
+  return (S.cycle>1?'第 '+cyc(h)+' 回 · ':'')+'第 '+h.round+' 輪結果'+(left===0?'　—　本回號碼已全部抽完，可按「再抽一回」繼續':'');
+}
+function nextCycle(){
+  if(busy) return;
+  if(!confirm('本回所有號碼都已抽完。\n要開始第 '+(S.cycle+1)+' 回，讓所有號碼重新加入抽獎嗎？\n（之前的紀錄會保留）')) return;
+  S.cycle++; save(); render(); showIdle(); toast('第 '+S.cycle+' 回開始');
+}
+function render(){
+  $('title').textContent=S.title; document.title=S.title;
+  $('per').textContent=S.per;
+  const pool=getPool().length, tot=totalCount();
+  $('status').innerHTML=(S.cycle>1?'第 <b>'+S.cycle+'</b> 回　·　':'')+'剩餘 <b>'+pool+'</b> / 共 '+tot+' 個號碼　·　已抽 '+S.history.length+' 輪';
+  $('drawBtn').disabled=busy||tot===0;
+  $('drawBtn').textContent=pool===0&&tot>0?'再抽一回':'抽獎';
+  renderHist();
+}
+function renderHist(){
+  const ul=$('histList'); ul.innerHTML='';
+  if(!S.history.length){ul.innerHTML='<li style="color:var(--muted)">尚無紀錄</li>';}
+  for(let i=S.history.length-1;i>=0;i--){
+    const h=S.history[i], li=document.createElement('li'), t=new Date(h.t);
+    li.innerHTML='<div class="rt">'+(S.cycle>1?'第 '+cyc(h)+' 回 · ':'')+'第 '+h.round+' 輪　'+t.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+'</div>'+
+      h.nums.map(n=>'<span class="chip">'+fmt(n)+'</span>').join('');
+    ul.appendChild(li);
+  }
+  $('undoBtn').disabled=!S.history.length;
+  $('copyBtn').disabled=!S.history.length;
+}
+
+/* ---------- 抽獎 ---------- */
+function draw(){
+  if(busy||isOpen()) return;
+  const pool=getPool();
+  if(!pool.length){if(totalCount()) nextCycle(); else toast('沒有可抽的號碼，請到設定調整'); return;}
+  const k=Math.min(S.per,pool.length);
+  if(k<S.per) toast('剩餘號碼不足，本輪只抽 '+k+' 個');
+  const res=pick(pool,k);
+  busy=true; render(); keepAwake();
+  $('msg').textContent='抽獎中…';
+  setCards(Array(k).fill(fmt(pool[0])),'rolling');
+  const cards=[...cardsEl.children], t0=performance.now();
+  const step=k>8?120:k>3?250:450;
+  const stops=cards.map((_,i)=>1600+i*step);
+  const done=new Array(k).fill(false);
+  let lastTick=0;
+  const timer=setInterval(()=>frame(performance.now()),30);
+  function frame(now){
+    const el=now-t0; let all=true;
+    for(let i=0;i<k;i++){
+      if(done[i]) continue;
+      if(el>=stops[i]){
+        done[i]=true; cards[i].textContent=fmt(res[i]);
+        cards[i].className='card hit'; beep(880,.12,.08,'triangle');
+      }else{all=false; if(now-lastTick>55) cards[i].textContent=fmt(pool[randInt(pool.length)]);}
+    }
+    if(now-lastTick>55){lastTick=now; if(!all) beep(300+Math.random()*200,.03,.025);}
+    if(!all) return;
+    clearInterval(timer);
+    S.history.push({round:S.history.length+1,cycle:S.cycle,nums:res,t:Date.now()});
+    save(); busy=false;
+    chime(); confetti(); render();
+    $('msg').textContent=resultMsg(S.history[S.history.length-1]);
+    if(!getPool().length) toast('本回號碼已全部抽完');
+  }
+}
+
+/* ---------- 音效 ---------- */
+let ac=null;
+function beep(f,d,v,type){
+  if(!S.sound) return;
+  try{
+    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+    const o=ac.createOscillator(), g=ac.createGain(), t=ac.currentTime;
+    o.type=type||'square'; o.frequency.value=f;
+    g.gain.setValueAtTime(v||.05,t); g.gain.exponentialRampToValueAtTime(.0001,t+d);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+d);
+  }catch(e){}
+}
+function chime(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.5,.07,'triangle'),i*90));}
+
+/* ---------- 彩帶 ---------- */
+const cv=$('fx'), cx=cv.getContext('2d'); let parts=[], raf=0;
+function resizeFx(){const d=window.devicePixelRatio||1; cv.width=innerWidth*d; cv.height=innerHeight*d;}
+function confetti(){
+  const d=window.devicePixelRatio||1, W=cv.width, H=cv.height, cols=['#ffd36b','#ff4d4d','#ffffff','#ffb020','#ff7aa8','#7ad7ff'];
+  for(let i=0;i<220;i++){
+    const left=i%2===0;
+    parts.push({x:left?0:W,y:H*.75,vx:(left?1:-1)*(4+Math.random()*10)*d,vy:-(8+Math.random()*12)*d,
+      r:(6+Math.random()*8)*d,a:Math.random()*6.28,va:(Math.random()-.5)*.4,c:cols[i%cols.length]});
+  }
+  if(!raf) raf=requestAnimationFrame(tickFx);
+}
+function tickFx(){
+  const d=window.devicePixelRatio||1;
+  cx.clearRect(0,0,cv.width,cv.height);
+  parts=parts.filter(p=>p.y<cv.height+50);
+  for(const p of parts){
+    p.vx*=.985; p.vy+=.25*d; if(p.vy>4*d) p.vy=4*d;
+    p.x+=p.vx; p.y+=p.vy; p.a+=p.va;
+    cx.save(); cx.translate(p.x,p.y); cx.rotate(p.a); cx.fillStyle=p.c;
+    cx.fillRect(-p.r/2,-p.r/4,p.r,p.r/2*Math.abs(Math.cos(p.a*2))+1); cx.restore();
+  }
+  raf=parts.length?requestAnimationFrame(tickFx):0;
+  if(!raf) cx.clearRect(0,0,cv.width,cv.height);
+}
+
+/* ---------- 其他功能 ---------- */
+let toastT=0;
+function toast(t){const el=$('toast'); el.textContent=t; el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),2200);}
+function isOpen(){return $('setMask').classList.contains('open');}
+
+let wl=null;
+async function keepAwake(){try{if(navigator.wakeLock&&!wl){wl=await navigator.wakeLock.request('screen'); wl.addEventListener('release',()=>{wl=null;});}}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S.history.length) keepAwake();});
+
+function toggleFs(){
+  const d=document, el=d.documentElement;
+  try{
+    if(d.fullscreenElement||d.webkitFullscreenElement){(d.exitFullscreen||d.webkitExitFullscreen).call(d);}
+    else{(el.requestFullscreen||el.webkitRequestFullscreen).call(el); keepAwake();}
+  }catch(e){toast('此瀏覽器不支援全螢幕');}
+}
+function copyText(t){
+  const fallback=()=>{const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select();
+    try{document.execCommand('copy'); toast('已複製');}catch(e){toast('複製失敗');} ta.remove();};
+  if(navigator.clipboard&&window.isSecureContext) navigator.clipboard.writeText(t).then(()=>toast('已複製'),fallback); else fallback();
+}
+
+$('drawBtn').onclick=draw;
+function setPer(n){
+  if(busy) return;
+  S.per=Math.max(1,Math.min(MAX_PER,n)); save(); render();
+  setCards(Array(S.per).fill('?'),'idle'); $('msg').textContent='每次抽 '+S.per+' 個';
+}
+$('minus').onclick=()=>setPer(S.per-1);
+$('plus').onclick=()=>setPer(S.per+1);
+$('fsBtn').onclick=toggleFs;
+$('histBtn').onclick=()=>$('drawer').classList.toggle('open');
+$('closeHist').onclick=()=>$('drawer').classList.remove('open');
+$('copyBtn').onclick=()=>copyText(S.history.map(h=>(S.cycle>1?'第'+cyc(h)+'回 ':'')+'第'+h.round+'輪：'+h.nums.map(fmt).join(', ')).join('\n'));
+$('undoBtn').onclick=()=>{
+  if(busy||!S.history.length) return;
+  const h=S.history[S.history.length-1];
+  if(!confirm('確定復原第 '+h.round+' 輪？\n號碼 '+h.nums.map(fmt).join(', ')+' 會放回抽獎池。')) return;
+  S.history.pop(); S.cycle=cyc(h); save(); render(); showIdle(); toast('已復原第 '+h.round+' 輪');
+};
+$('setBtn').onclick=()=>{
+  if(busy) return;
+  $('fTitle').value=S.title; $('fMin').value=S.min; $('fMax').value=S.max; $('fEx').value=S.exclude;
+  $('fPad').checked=S.pad; $('fRepeat').checked=S.repeat; $('fSound').checked=S.sound;
+  $('setMask').classList.add('open');
+};
+$('cancelSet').onclick=()=>$('setMask').classList.remove('open');
+$('setMask').onclick=e=>{if(e.target===$('setMask')) $('setMask').classList.remove('open');};
+$('saveSet').onclick=()=>{
+  const mn=parseInt($('fMin').value,10), mx=parseInt($('fMax').value,10);
+  if(!Number.isFinite(mn)||!Number.isFinite(mx)||mn<0||mx<0){alert('請輸入有效的起始與結束號碼'); return;}
+  if(mn>mx){alert('起始號碼不能大於結束號碼'); return;}
+  if(mx-mn+1>MAX_RANGE){alert('號碼範圍最多 '+MAX_RANGE+' 個'); return;}
+  S.title=$('fTitle').value.trim()||'尾牙抽獎'; S.min=mn; S.max=mx; S.exclude=$('fEx').value.trim();
+  S.pad=$('fPad').checked; S.repeat=$('fRepeat').checked; S.sound=$('fSound').checked;
+  save(); $('setMask').classList.remove('open'); render(); showIdle(); toast('設定已儲存');
+};
+$('resetBtn').onclick=()=>{
+  if(!confirm('確定清除所有抽獎紀錄？此動作無法復原。')) return;
+  S.history=[]; S.cycle=1; save(); $('setMask').classList.remove('open'); render(); showIdle(); toast('紀錄已清除');
+};
+
+document.addEventListener('keydown',e=>{
+  if(isOpen()){if(e.key==='Escape') $('setMask').classList.remove('open'); return;}
+  if(e.target.closest&&e.target.closest('input,textarea')) return;
+  if(e.key===' '||e.key==='Enter'){e.preventDefault(); draw();}
+  else if(e.key==='f'||e.key==='F') toggleFs();
+  else if(e.key==='h'||e.key==='H') $('drawer').classList.toggle('open');
+  else if(e.key==='Escape') $('drawer').classList.remove('open');
+});
+window.addEventListener('resize',()=>{resizeFx(); layout();});
+
+resizeFx(); render(); showIdle();
+})();
+</script>
+</body>
+</html>
