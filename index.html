@@ -41,7 +41,17 @@ h1{margin:.2em 0 .1em;font-size:calc(7vmin * var(--ts));line-height:1.15;color:v
 #bgBlur{inset:-40px;background:url(bg.webp) center/cover no-repeat;filter:blur(28px) brightness(.8)}
 #bgMain{top:0;left:50%;transform:translateX(-50%);background:url(bg.webp) center top/100% 100% no-repeat;
   width:min(100vw, calc(100vh * var(--bgar)));aspect-ratio:941 / 1672}
-body.hasbg #bgSpacer{height:calc(min(100vh, 100vw / var(--bgar, 0.5628)) * var(--bgtop, .39))}
+body.hasbg #bgSpacer{display:none}
+/* 抽獎顯示區固定在背景圖的「顯示框」內（以背景圖的比例定位，任何螢幕都跟著圖走） */
+body.hasbg #stage{position:fixed;z-index:1;
+  --bw:min(100vw, calc(100vh * var(--bgar)));
+  --bh:calc(var(--bw) / var(--bgar));
+  left:calc(50vw - var(--bw) / 2 + var(--bw) * var(--boxL, .0181));
+  top:calc(var(--bh) * var(--boxT, .4037));
+  width:calc(var(--bw) * var(--boxW, .9724));
+  height:calc(var(--bh) * var(--boxH, .4049));
+  padding:.3rem .3rem 1.8rem}
+body.hasbg footer{margin-top:auto}
 body.hasbg{background:#b3121a}
 body.hasbg #bgBlur,body.hasbg #bgMain{display:block}
 body.hasbg .tools{position:absolute;top:.5rem;right:.6rem;z-index:5}
@@ -307,7 +317,6 @@ details summary{cursor:pointer;color:var(--muted);margin:.5rem 0}
       <label class="check"><input type="checkbox" id="fPad">號碼補零顯示（例：007）</label>
       <label class="check"><input type="checkbox" id="fBg">使用背景圖（bg.webp）</label>
       <label class="check"><input type="checkbox" id="fShowTitle">使用背景圖時，仍顯示上方標題文字</label>
-      <div class="field"><div class="rangeRow"><span>背景上方圖案保留高度</span><b id="vBgTop"></b></div><input type="range" id="sBgTop" min="0" max="70" step="1"></div>
     </section>
 
     <section class="set">
@@ -462,8 +471,9 @@ function layout(){
   const W=r.width-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)-8;
   const H=r.height-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom)-8;
   const d=noWidth(), nl=maxNameLen(), ns=S.nameScale/100, numW=d*0.72+0.2;
+  // 1～4 位：一律橫式（號碼＋姓名同一行）；5 位以上才自動選直式或橫式
   const shapes=nl>0?[
-    {cls:'v',w:Math.max(numW,nl*ns)+0.6,h:1+ns*1.32+0.5},
+    ...(k<=4?[]:[{cls:'v',w:Math.max(numW,nl*ns)+0.6,h:1+ns*1.32+0.5}]),
     {cls:'h',w:numW+0.45*Math.max(1,ns)+nl*ns+0.8,h:Math.max(1,ns*1.2)+0.45}
   ]:[{cls:'h',w:numW+0.5,h:1.3}];
   let best={fs:0,c:1,gap:0,sh:shapes[0]};
@@ -845,7 +855,6 @@ const sliders=[
   ['sUi','uiScale','vUi',v=>v+'%'],
   ['sRoll','rollSec','vRoll',v=>v+' 秒'],
   ['sStag','staggerSec','vStag',v=>v+' 秒'],
-  ['sBgTop','bgTop','vBgTop',v=>v+'%'],
 ];
 function syncForm(){
   $('fTitle').value=S.title; $('fMin').value=S.min; $('fMax').value=S.max; $('fEx').value=S.exclude;
@@ -910,7 +919,7 @@ $('eggPreview').onclick=()=>{
 };
 
 /* ---------- 彩蛋動畫 ---------- */
-const EGG_LINES=['這不是內定的！','我發誓沒有作弊！','今年手氣特別好！','處長也想要獎品啦～','運氣好，擋不住！','這次真的是自己抽到的！'];
+const EGG_LINES=['處長也想要獎品啦～'];
 let eggTimer=0;
 function eggNameSet(){return new Set(String(S.eggNames||'').split(/[\s,，、;；]+/).map(cleanName).filter(Boolean));}
 function isEggPerson(p){return !!(S.eggOn&&p&&p.name&&eggNameSet().has(cleanName(p.name)));}
@@ -918,7 +927,7 @@ function eggShowing(){return $('egg').classList.contains('show');}
 function hideEgg(){clearTimeout(eggTimer); $('egg').classList.remove('show');}
 function showEgg(name){
   const el=$('egg');
-  $('eggTitle').textContent=name+' 中獎啦！';
+  $('eggTitle').textContent='處長 中獎啦！';
   $('eggBubble').textContent=EGG_LINES[randInt(EGG_LINES.length)];
   el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');  // 重新播放動畫
   eggSound(); keepAwake();
