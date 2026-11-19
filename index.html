@@ -89,6 +89,17 @@ footer{display:flex;align-items:center;justify-content:space-between;gap:1rem;pa
   footer{flex-direction:column;justify-content:center}
   .status{text-align:center}
 }
+/* 手機等窄螢幕：底部壓成一列，把高度留給號碼卡 */
+@media (max-width:520px){
+  footer{gap:.35rem;padding:.3rem .6rem .6rem}
+  .status{font-size:1.05rem}
+  .controls{flex-wrap:nowrap;gap:.6rem}
+  .stepper{font-size:1.05rem;gap:.3rem}
+  .stepper .btn{width:2em;height:2em}
+  #drawBtn{font-size:1.9rem;padding:.25em .9em;letter-spacing:.1em}
+  #stage{padding-bottom:1.8rem}
+  #msg{font-size:1rem}
+}
 
 /* drawers */
 .drawer{position:fixed;top:0;right:0;bottom:0;width:min(34rem,100vw);background:var(--panel);border-left:1px solid var(--line);
