@@ -10,7 +10,7 @@
   --bg1:#8a0e0e; --bg2:#2a0303; --gold:#ffd36b; --gold2:#e8a530;
   --text:#fff6e0; --muted:#e9c9a0; --cardText:#b01313; --nameText:#5a1010;
   --panel:#3a0707; --line:rgba(255,211,107,.35);
-  --ui:1; --ts:1.3;
+  --ui:1; --ts:1.3; --bgar:0.5628; --bgtop:.39;
 }
 *{box-sizing:border-box}
 html{font-size:calc(clamp(14px, 1.1vmin + 8px, 30px) * var(--ui))}
@@ -36,7 +36,14 @@ h1{margin:.2em 0 .1em;font-size:calc(7vmin * var(--ts));line-height:1.15;color:v
 .tools .btn{opacity:.75;font-size:.9rem}
 /* 背景圖模式 */
 #bgSpacer{flex-shrink:0;height:0}
-body.hasbg{background:#c8161d url(bg.webp) center top no-repeat}
+/* 主圖完整顯示（不裁切），兩側或下方空白用同一張圖模糊後填滿 */
+#bgBlur,#bgMain{position:fixed;z-index:-1;pointer-events:none;display:none}
+#bgBlur{inset:-40px;background:url(bg.webp) center/cover no-repeat;filter:blur(28px) brightness(.8)}
+#bgMain{top:0;left:50%;transform:translateX(-50%);background:url(bg.webp) center top/100% 100% no-repeat;
+  width:min(100vw, calc(100vh * var(--bgar)));aspect-ratio:941 / 1672}
+body.hasbg #bgSpacer{height:calc(min(100vh, 100vw / var(--bgar, 0.5628)) * var(--bgtop, .39))}
+body.hasbg{background:#b3121a}
+body.hasbg #bgBlur,body.hasbg #bgMain{display:block}
 body.hasbg .tools{position:absolute;top:.5rem;right:.6rem;z-index:5}
 body.hasbg .tools .btn{opacity:.35}
 body.hasbg .tools .btn:hover{opacity:1}
@@ -142,6 +149,7 @@ details summary{cursor:pointer;color:var(--muted);margin:.5rem 0}
 </head>
 <body>
 <div class="app">
+  <div id="bgBlur"></div><div id="bgMain"></div>
   <div id="bgSpacer"></div>
   <header>
     <div class="tools">
@@ -386,11 +394,11 @@ function applyBg(){
   const on=S.bg&&bgOk;
   document.body.classList.toggle('hasbg',on);
   $('title').style.display=(!on||S.showTitle)?'':'none';
-  if(!on){document.body.style.backgroundSize=''; $('bgSpacer').style.height='0'; return;}
-  const vw=innerWidth, vh=innerHeight, ar=BG.w/BG.h; let w,h;
-  if(vw/vh<ar){w=vw; h=vw/ar;} else {w=Math.max(vw,vh*ar); h=w/ar;}
-  document.body.style.backgroundSize=w+'px '+h+'px';
-  $('bgSpacer').style.height=(h*S.bgTop/100)+'px';
+  if(!on) return;
+  // 完整顯示整張圖（CSS 計算）：直式螢幕以寬度為準、橫式螢幕以高度為準
+  const r=document.documentElement.style;
+  r.setProperty('--bgar',BG.w/BG.h); r.setProperty('--bgtop',S.bgTop/100);
+  $('bgMain').style.aspectRatio=BG.w+' / '+BG.h; $('bgSpacer').style.height='';
 }
 (function(){const im=new Image();
   im.onload=()=>{BG.w=im.naturalWidth; BG.h=im.naturalHeight; applyBg(); layout();};
@@ -1007,7 +1015,8 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='s'||e.key==='S') openDrawer('setDrawer');
   else if(e.key==='Escape') closeDrawers();
 });
-window.addEventListener('resize',()=>{resizeFx(); applyBg(); layout();});
+window.addEventListener('resize',()=>{resizeFx(); layout();});
+if(window.ResizeObserver) new ResizeObserver(()=>{resizeFx(); layout();}).observe(stage);
 
 resizeFx(); render(); showIdle();
 })();
