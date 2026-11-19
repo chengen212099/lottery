@@ -471,11 +471,24 @@ function layout(){
   const W=r.width-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)-8;
   const H=r.height-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom)-8;
   const d=noWidth(), nl=maxNameLen(), ns=S.nameScale/100, numW=d*0.72+0.2;
-  // 1～4 位：一律橫式（號碼＋姓名同一行）；5 位以上才自動選直式或橫式
   const shapes=nl>0?[
-    ...(k<=4?[]:[{cls:'v',w:Math.max(numW,nl*ns)+0.6,h:1+ns*1.32+0.5}]),
+    {cls:'v',w:Math.max(numW,nl*ns)+0.6,h:1+ns*1.32+0.5},
     {cls:'h',w:numW+0.45*Math.max(1,ns)+nl*ns+0.8,h:Math.max(1,ns*1.2)+0.45}
   ]:[{cls:'h',w:numW+0.5,h:1.3}];
+  // 1～4 位：把顯示框平均切成 k 條，每條填滿整個寬度；字在格子裡放到最大
+  if(k<=4){
+    const gap=Math.min(W,H)*0.025, cw=W, ch=(H-gap*(k-1))/k;
+    let b=null;
+    for(const sh of shapes){const f=Math.min(cw/sh.w,ch/sh.h); if(!b||f>b.fs) b={fs:f,sh};}
+    const fs=Math.max(10,b.fs*S.numScale/100);
+    cardsEl.style.gap=gap+'px'; cardsEl.style.maxWidth=(cw+1)+'px';
+    for(const el of cardsEl.children){
+      el.classList.remove('v','h'); el.classList.add(b.sh.cls);
+      el.style.fontSize=fs+'px'; el.style.width=cw+'px'; el.style.height=ch+'px';
+      const nm=el.querySelector('.nm'); if(nm) nm.style.fontSize=ns+'em';
+    }
+    return;
+  }
   let best={fs:0,c:1,gap:0,sh:shapes[0]};
   for(const sh of shapes) for(let c=1;c<=k;c++){
     const rows=Math.ceil(k/c), gap=Math.min(W,H)*0.03;
@@ -1029,7 +1042,7 @@ function copyText(t){
 function setPer(n){
   if(busy) return;
   S.per=Math.max(1,Math.min(MAX_PER,n)); save(); render();
-  setCards(Array(S.per).fill(null),'idle'); $('msg').textContent='每次抽 '+S.per+' 位';
+  setCards(Array(S.per).fill(null),'idle'); $('msg').textContent='';
 }
 
 $('drawBtn').onclick=draw;
