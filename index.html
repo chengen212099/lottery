@@ -4,108 +4,131 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#5a0606">
-<title>尾牙抽獎</title>
+<title>115擴大處務會報暨年終檢討會</title>
 <style>
 :root{
   --bg1:#8a0e0e; --bg2:#2a0303; --gold:#ffd36b; --gold2:#e8a530;
-  --text:#fff6e0; --muted:#e9c9a0; --cardText:#b01313;
+  --text:#fff6e0; --muted:#e9c9a0; --cardText:#b01313; --nameText:#5a1010;
   --panel:#3a0707; --line:rgba(255,211,107,.35);
+  --ui:1; --ts:1.3;
 }
 *{box-sizing:border-box}
+html{font-size:calc(clamp(14px, 1.1vmin + 8px, 30px) * var(--ui))}
 html,body{margin:0;height:100%}
 body{
   background:radial-gradient(ellipse at 50% 0%,var(--bg1),var(--bg2) 75%);
-  background-color:var(--bg2);
-  color:var(--text);
+  background-color:var(--bg2); color:var(--text);
   font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC","Heiti TC",sans-serif;
   overflow:hidden; user-select:none; -webkit-user-select:none;
   -webkit-tap-highlight-color:transparent; overscroll-behavior:none;
 }
-.app{display:flex;flex-direction:column;height:100vh;height:100dvh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px}
-h1{margin:0;font-size:clamp(26px,4.2vw,64px);color:var(--gold);letter-spacing:.12em;
-  text-shadow:0 3px 0 #5a0000,0 0 24px rgba(255,200,80,.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tools{display:flex;gap:8px;flex-shrink:0}
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+header{padding:.6rem 1rem 0;text-align:center}
+.tools{display:flex;justify-content:flex-end;gap:.5rem}
+h1{margin:.2em 0 .1em;font-size:calc(7vmin * var(--ts));line-height:1.15;color:var(--gold);letter-spacing:.08em;
+  text-shadow:0 .05em 0 #5a0000,0 0 .4em rgba(255,200,80,.45);word-break:break-all}
 .btn{font:inherit;cursor:pointer;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--text);
-  border-radius:10px;padding:8px 14px;font-size:clamp(14px,1.3vw,18px)}
+  border-radius:.6rem;padding:.4rem .9rem;font-size:1rem}
 .btn:hover{background:rgba(255,211,107,.15)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .btn.gold{background:linear-gradient(#ffe08a,#e8a530);color:#6a0a0a;border-color:#ffe9a8;font-weight:700}
+.btn.small{padding:.2rem .6rem;font-size:.9rem}
+.tools .btn{opacity:.75;font-size:.9rem}
 
-#stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;min-height:0;padding:10px}
+#stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;min-height:0;padding:.5rem .5rem 2.2rem}
 #cards{display:flex;flex-wrap:wrap;justify-content:center;align-content:center}
 .card{
   display:flex;align-items:center;justify-content:center;
   background:linear-gradient(#fffdf5,#ffe6ad);color:var(--cardText);
   border:.04em solid var(--gold2);border-radius:.12em;
   box-shadow:0 .04em 0 #9a5b00,0 .08em .25em rgba(0,0,0,.45),inset 0 0 0 .02em #fff;
-  font-weight:900;line-height:1;font-variant-numeric:tabular-nums;
-  font-family:"Arial Black","Helvetica Neue",Arial,"Microsoft JhengHei",sans-serif;
+  line-height:1; overflow:hidden;
 }
-.card.idle{color:#d8a35a}
-.card.rolling{color:#c54a4a}
+.card.v{flex-direction:column}
+.card.h{flex-direction:row}
+.card .no{font-weight:900;font-variant-numeric:tabular-nums;font-family:"Arial Black","Helvetica Neue",Arial,sans-serif;white-space:nowrap}
+.card .nm{font-weight:800;color:var(--nameText);white-space:nowrap;line-height:1.2;min-height:1.2em;
+  font-family:"Microsoft JhengHei","Noto Sans TC","PingFang TC",sans-serif}
+.card.v .nm{margin-top:.12em}
+.card.h .nm{margin-left:.45em}
+.card.idle .no{color:#d8a35a}
+.card.rolling .no{color:#c54a4a}
+.card.rolling .nm{color:#8a4a4a}
 .card.hit{animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
 @keyframes pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
-#msg{position:absolute;bottom:4px;left:0;right:0;text-align:center;color:var(--muted);font-size:clamp(14px,1.6vw,22px)}
+#msg{position:absolute;bottom:.3rem;left:0;right:0;text-align:center;color:var(--muted);font-size:1.2rem;padding:0 1rem}
 
-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 20px 18px;flex-wrap:wrap}
-.status{font-size:clamp(15px,1.6vw,24px);color:var(--muted)}
+footer{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.6rem 1rem 1rem;flex-wrap:wrap}
+.status{font-size:1.3rem;color:var(--muted)}
 .status b{color:var(--gold);font-size:1.25em}
-.stepper{display:flex;align-items:center;gap:8px;font-size:clamp(15px,1.6vw,22px)}
+.controls{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;justify-content:center}
+.stepper{display:flex;align-items:center;gap:.5rem;font-size:1.3rem}
 .stepper .btn{width:2.2em;height:2.2em;padding:0;font-size:1em}
 .stepper output{min-width:2ch;text-align:center;font-weight:700;color:var(--gold);font-size:1.3em}
-#drawBtn{font-size:clamp(24px,3vw,44px);padding:.3em 1.6em;border-radius:.5em;letter-spacing:.2em;
+#drawBtn{font-size:2.4rem;padding:.3em 1.6em;border-radius:.5em;letter-spacing:.2em;
   box-shadow:0 .12em 0 #8a4a00,0 0 30px rgba(255,200,80,.35)}
 #drawBtn:active:not(:disabled){transform:translateY(.08em);box-shadow:0 .04em 0 #8a4a00}
-.right{display:flex;align-items:center;gap:16px}
+@media (orientation:portrait){
+  footer{flex-direction:column;justify-content:center}
+  .status{text-align:center}
+}
 
-/* drawer */
-.drawer{position:fixed;top:0;right:0;bottom:0;width:min(420px,92vw);background:var(--panel);border-left:1px solid var(--line);
-  transform:translateX(100%);transition:transform .25s;z-index:20;display:flex;flex-direction:column;box-shadow:-10px 0 30px rgba(0,0,0,.5)}
+/* drawers */
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(34rem,100vw);background:var(--panel);border-left:1px solid var(--line);
+  transform:translateX(105%);transition:transform .25s;z-index:20;display:flex;flex-direction:column;box-shadow:-10px 0 30px rgba(0,0,0,.5)}
 .drawer.open{transform:none}
-.drawer h2,.modal h2{margin:0;color:var(--gold);font-size:22px}
-.dhead{display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid var(--line)}
-#histList{flex:1;overflow:auto;margin:0;padding:8px 16px;list-style:none;user-select:text;-webkit-user-select:text}
-#histList li{padding:10px 0;border-bottom:1px dashed var(--line)}
-#histList .rt{font-size:14px;color:var(--muted);margin-bottom:6px}
-.chip{display:inline-block;background:#fff3d0;color:var(--cardText);font-weight:800;border-radius:6px;padding:2px 8px;margin:2px;font-variant-numeric:tabular-nums;font-size:18px}
-.dfoot{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.drawer h2{margin:0;color:var(--gold);font-size:1.4rem}
+.dhead{display:flex;justify-content:space-between;align-items:center;padding:.8rem 1rem;border-bottom:1px solid var(--line)}
+.dbody{flex:1;overflow:auto;padding:.4rem 1rem 2rem;user-select:text;-webkit-user-select:text}
+.dfoot{display:flex;gap:.5rem;padding:.8rem 1rem;border-top:1px solid var(--line);flex-wrap:wrap}
+#histList{margin:0;padding:0;list-style:none}
+#histList li{padding:.6rem 0;border-bottom:1px dashed var(--line)}
+#histList .rt{font-size:.85rem;color:var(--muted);margin-bottom:.3rem}
+.chip{display:inline-block;background:#fff3d0;color:var(--cardText);font-weight:800;border-radius:.4rem;padding:.1rem .5rem;margin:.15rem;font-size:1.05rem}
+.chip small{color:var(--nameText);font-size:.95em;margin-left:.3em}
 
-.mask{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:30;display:none;align-items:center;justify-content:center;padding:16px}
-.mask.open{display:flex}
-.modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;width:min(520px,100%);max-height:100%;overflow:auto;padding:20px}
-.field{margin:14px 0}
-.field label{display:block;margin-bottom:6px;color:var(--muted);font-size:15px}
-.field input[type=text],.field input[type=number],.field textarea{width:100%;font:inherit;font-size:17px;padding:8px 10px;border-radius:8px;
-  border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--text);user-select:text;-webkit-user-select:text}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.check{display:flex;align-items:center;gap:8px;margin:10px 0;font-size:16px;cursor:pointer}
-.check input{width:20px;height:20px}
-.hint{font-size:13px;color:var(--muted);margin-top:4px}
-.mfoot{display:flex;justify-content:space-between;gap:8px;margin-top:18px;flex-wrap:wrap}
+section.set{border-bottom:1px solid var(--line);padding:.6rem 0 1rem}
+section.set h3{margin:.4rem 0 .6rem;color:var(--gold);font-size:1.1rem}
+.field{margin:.7rem 0}
+.field>label{display:block;margin-bottom:.3rem;color:var(--muted);font-size:.95rem}
+input[type=text],input[type=number],textarea,select{width:100%;font:inherit;font-size:1rem;padding:.45rem .6rem;border-radius:.5rem;
+  border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--text)}
+select option{background:var(--panel)}
+input[type=range]{width:100%;accent-color:var(--gold2)}
+.rangeRow{display:flex;justify-content:space-between;color:var(--muted);font-size:.95rem}
+.rangeRow b{color:var(--gold)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.addRow{display:grid;grid-template-columns:6rem 1fr auto;gap:.5rem}
+.check{display:flex;align-items:center;gap:.5rem;margin:.6rem 0;font-size:1rem;cursor:pointer}
+.check input{width:1.2rem;height:1.2rem}
+.hint{font-size:.85rem;color:var(--muted);margin-top:.3rem;line-height:1.5}
+.err{color:#ff9b9b}
+.box{background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:.6rem;padding:.6rem .8rem;margin:.6rem 0}
+.btnRow{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem}
+#rosterList{max-height:18rem;overflow:auto;margin:.5rem 0 0;padding:0;list-style:none;border:1px solid var(--line);border-radius:.5rem}
+#rosterList li{display:flex;align-items:center;gap:.6rem;padding:.3rem .6rem;border-bottom:1px solid rgba(255,211,107,.12);font-size:.95rem}
+#rosterList li .rn{font-variant-numeric:tabular-nums;color:var(--gold);min-width:3.5ch}
+#rosterList li .rnm{flex:1}
+#rosterList li.ex .rnm,#rosterList li.ex .rn{text-decoration:line-through;opacity:.5}
+.tag{font-size:.75rem;border:1px solid var(--line);border-radius:.3rem;padding:0 .3rem;color:var(--muted)}
+.tag.win{color:#6a0a0a;background:var(--gold);border-color:var(--gold)}
+details summary{cursor:pointer;color:var(--muted);margin:.5rem 0}
 
-#toast{position:fixed;left:50%;top:20px;transform:translateX(-50%);background:#fff3d0;color:#6a0a0a;padding:10px 18px;border-radius:10px;
-  font-weight:700;z-index:50;opacity:0;transition:opacity .25s;pointer-events:none}
+#toast{position:fixed;left:50%;top:1.2rem;transform:translateX(-50%);background:#fff3d0;color:#6a0a0a;padding:.6rem 1.1rem;border-radius:.6rem;
+  font-weight:700;z-index:50;opacity:0;transition:opacity .25s;pointer-events:none;font-size:1.1rem;max-width:90vw;text-align:center}
 #toast.show{opacity:1}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:10}
-
-@media (max-width:640px){
-  header,footer{padding-left:16px;padding-right:16px}
-  footer{justify-content:center}
-  .right{width:100%;justify-content:space-between}
-  .tools .btn{padding:6px 10px}
-}
 </style>
 </head>
 <body>
 <div class="app">
   <header>
-    <h1 id="title">尾牙抽獎</h1>
     <div class="tools">
       <button class="btn" id="histBtn" title="快捷鍵 H">紀錄</button>
-      <button class="btn" id="setBtn">設定</button>
+      <button class="btn" id="setBtn" title="快捷鍵 S">設定</button>
       <button class="btn" id="fsBtn" title="快捷鍵 F">全螢幕</button>
     </div>
+    <h1 id="title">115擴大處務會報暨年終檢討會</h1>
   </header>
 
   <div id="stage">
@@ -115,51 +138,103 @@ footer{display:flex;align-items:center;justify-content:space-between;gap:16px;pa
 
   <footer>
     <div class="status" id="status"></div>
-    <div class="right">
+    <div class="controls">
       <div class="stepper">每次抽
         <button class="btn" id="minus" aria-label="減少">−</button>
         <output id="per">1</output>
-        <button class="btn" id="plus" aria-label="增加">＋</button>個
+        <button class="btn" id="plus" aria-label="增加">＋</button>位
       </div>
       <button class="btn gold" id="drawBtn" title="快捷鍵 空白鍵 / Enter">抽獎</button>
     </div>
   </footer>
 </div>
 
-<aside class="drawer" id="drawer">
-  <div class="dhead"><h2>抽獎紀錄</h2><button class="btn" id="closeHist">關閉</button></div>
-  <ul id="histList"></ul>
+<!-- 抽獎紀錄 -->
+<aside class="drawer" id="histDrawer">
+  <div class="dhead"><h2>抽獎紀錄</h2><button class="btn" data-close>關閉</button></div>
+  <div class="dbody"><ul id="histList"></ul></div>
   <div class="dfoot">
     <button class="btn" id="copyBtn">複製結果</button>
     <button class="btn" id="undoBtn">復原上一輪</button>
   </div>
 </aside>
 
-<div class="mask" id="setMask">
-  <div class="modal">
-    <h2>設定</h2>
-    <div class="field"><label for="fTitle">標題</label><input type="text" id="fTitle"></div>
-    <div class="row2">
-      <div class="field"><label for="fMin">起始號碼</label><input type="number" id="fMin" inputmode="numeric"></div>
-      <div class="field"><label for="fMax">結束號碼</label><input type="number" id="fMax" inputmode="numeric"></div>
-    </div>
-    <div class="field">
-      <label for="fEx">排除號碼（缺席、不參加）</label>
-      <textarea id="fEx" rows="2" placeholder="例：5, 8, 20-25"></textarea>
-      <div class="hint">用逗號或空白分隔，可用 20-25 表示範圍</div>
-    </div>
-    <label class="check"><input type="checkbox" id="fPad">號碼補零顯示（例：007）</label>
-    <label class="check"><input type="checkbox" id="fRepeat">已中獎號碼可再次被抽中</label>
-    <label class="check"><input type="checkbox" id="fSound">音效</label>
-    <div class="mfoot">
-      <button class="btn" id="resetBtn">清除所有紀錄</button>
-      <div style="display:flex;gap:8px">
-        <button class="btn" id="cancelSet">取消</button>
-        <button class="btn gold" id="saveSet">儲存</button>
+<!-- 設定 -->
+<aside class="drawer" id="setDrawer">
+  <div class="dhead"><h2>設定 <span class="hint">（修改後立即生效）</span></h2><button class="btn" data-close>關閉</button></div>
+  <div class="dbody">
+
+    <section class="set">
+      <h3>抽獎名單</h3>
+      <div id="rosterStatus" class="box"></div>
+      <div class="btnRow">
+        <button class="btn gold" id="importBtn">匯入 Excel / CSV</button>
+        <input type="file" id="fileIn" accept=".xlsx,.xls,.csv,.txt" hidden>
+        <button class="btn" id="clearRosterBtn">清除名單</button>
       </div>
-    </div>
+      <div class="hint">Excel 需要有「姓名」與「編號」欄位（例如「抽獎券編號」），會自動辨識。名單只存在這台裝置的瀏覽器，不會上傳。</div>
+      <div id="impRes"></div>
+
+      <details>
+        <summary>或：直接貼上名單</summary>
+        <textarea id="pasteIn" rows="5" placeholder="每行一位：編號 姓名&#10;001 王小明&#10;002 李小華&#10;（可直接從 Excel 選取兩欄複製貼上）"></textarea>
+        <div class="btnRow"><button class="btn" id="pasteBtn">用貼上的內容取代名單</button></div>
+      </details>
+
+      <div class="field">
+        <label>手動新增人員（名單以外臨時參加）</label>
+        <div class="addRow">
+          <input type="number" id="addNo" placeholder="編號" inputmode="numeric">
+          <input type="text" id="addName" placeholder="姓名">
+          <button class="btn" id="addBtn">新增</button>
+        </div>
+        <div class="hint">編號可留空，會自動接在最後一號之後。</div>
+      </div>
+
+      <div id="rangeBox">
+        <div class="row2">
+          <div class="field"><label for="fMin">起始號碼</label><input type="number" id="fMin" inputmode="numeric"></div>
+          <div class="field"><label for="fMax">結束號碼</label><input type="number" id="fMax" inputmode="numeric"></div>
+        </div>
+        <div class="hint">尚未匯入名單時，以號碼範圍抽獎（只顯示號碼）。</div>
+      </div>
+      <ul id="rosterList"></ul>
+    </section>
+
+    <section class="set">
+      <h3>排除號碼（臨時不克參加）</h3>
+      <textarea id="fEx" rows="2" placeholder="例：5, 8, 20-25"></textarea>
+      <div class="hint">用逗號或空白分隔，可用 20-25 表示範圍。</div>
+      <div id="exInfo" class="hint"></div>
+    </section>
+
+    <section class="set">
+      <h3>畫面</h3>
+      <div class="field"><label for="fTitle">標題文字</label><input type="text" id="fTitle"></div>
+      <div class="field"><div class="rangeRow"><span>標題大小</span><b id="vTitle"></b></div><input type="range" id="sTitle" min="40" max="300" step="5"></div>
+      <div class="field"><div class="rangeRow"><span>號碼卡大小</span><b id="vNum"></b></div><input type="range" id="sNum" min="30" max="100" step="1"></div>
+      <div class="field"><div class="rangeRow"><span>姓名大小（相對號碼）</span><b id="vName"></b></div><input type="range" id="sName" min="25" max="100" step="1"></div>
+      <div class="field"><div class="rangeRow"><span>按鈕、文字大小</span><b id="vUi"></b></div><input type="range" id="sUi" min="60" max="250" step="5"></div>
+      <label class="check"><input type="checkbox" id="fPad">號碼補零顯示（例：007）</label>
+    </section>
+
+    <section class="set">
+      <h3>動畫</h3>
+      <div class="field"><div class="rangeRow"><span>滾動時間</span><b id="vRoll"></b></div><input type="range" id="sRoll" min="0.5" max="20" step="0.5"></div>
+      <div class="field"><div class="rangeRow"><span>一次抽多位時，每位依序停止的間隔</span><b id="vStag"></b></div><input type="range" id="sStag" min="0" max="5" step="0.1"></div>
+      <label class="check"><input type="checkbox" id="fSound">音效</label>
+    </section>
+
+    <section class="set">
+      <h3>其他</h3>
+      <label class="check"><input type="checkbox" id="fRepeat">同一回中，已中獎者可再次被抽中</label>
+      <div class="btnRow">
+        <button class="btn" id="resetViewBtn">畫面/動畫設定恢復預設</button>
+        <button class="btn" id="resetBtn">清除所有抽獎紀錄</button>
+      </div>
+    </section>
   </div>
-</div>
+</aside>
 
 <canvas id="fx"></canvas>
 <div id="toast"></div>
@@ -169,18 +244,32 @@ footer{display:flex;align-items:center;justify-content:space-between;gap:16px;pa
 'use strict';
 const KEY='weiya-lottery-v1';
 const MAX_RANGE=100000, MAX_PER=30;
-const DEF={title:'尾牙抽獎',min:1,max:100,per:1,exclude:'',pad:true,repeat:false,sound:true,cycle:1,history:[]};
+const VIEW_DEF={titleScale:130,numScale:100,nameScale:55,uiScale:100,rollSec:5,staggerSec:0.8};
+const DEF=Object.assign({title:'115擴大處務會報暨年終檢討會',min:1,max:100,per:1,exclude:'',pad:true,repeat:false,sound:true,cycle:1,history:[],roster:[],rosterSrc:''},VIEW_DEF);
 const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 let S=load();
 let busy=false;
 
 function load(){
-  try{const r=JSON.parse(localStorage.getItem(KEY)); if(r&&typeof r==='object') return Object.assign({},DEF,r,{history:Array.isArray(r.history)?r.history:[]});}catch(e){}
-  return Object.assign({},DEF,{history:[]});
+  let s=Object.assign({},DEF,{history:[],roster:[]});
+  try{const r=JSON.parse(localStorage.getItem(KEY)); if(r&&typeof r==='object') s=Object.assign(s,r);}catch(e){}
+  if(!s.title||s.title==='尾牙抽獎'||s.title==='115擴大處物會報暨年終檢討會') s.title=DEF.title; // 舊預設標題自動換成新預設
+  if(!Array.isArray(s.history)) s.history=[];
+  if(!Array.isArray(s.roster)) s.roster=[];
+  // 舊版紀錄（只有號碼）轉換
+  s.history=s.history.map(h=>{if(!h.picks&&Array.isArray(h.nums)){h.picks=h.nums.map(n=>({n,name:''})); delete h.nums;} return h;}).filter(h=>Array.isArray(h.picks));
+  return s;
 }
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast('無法儲存（瀏覽器儲存空間被封鎖）');}}
 
+/* ---------- 名單與號碼 ---------- */
+function rosterMode(){return S.roster.length>0;}
+function allEntries(){
+  if(rosterMode()) return S.roster;
+  const a=[]; for(let i=S.min;i<=S.max;i++) a.push({n:i,name:''}); return a;
+}
 function parseList(str){
   const set=new Set();
   for(const tok of String(str).split(/[\s,，、;；]+/)){
@@ -192,16 +281,23 @@ function parseList(str){
   return set;
 }
 function cyc(h){return h.cycle||1;}
-// 只計算「本回」抽過的號碼；進入下一回時所有號碼重新加入
-function drawnSet(){const s=new Set(); for(const h of S.history) if(cyc(h)===S.cycle) for(const n of h.nums) s.add(n); return s;}
+// 只計算「本回」抽過的；進入下一回時所有人重新加入
+function drawnSet(){const s=new Set(); for(const h of S.history) if(cyc(h)===S.cycle) for(const p of h.picks) s.add(p.n); return s;}
 function getPool(){
-  const ex=parseList(S.exclude), dr=S.repeat?new Set():drawnSet(), p=[];
-  for(let i=S.min;i<=S.max;i++) if(!ex.has(i)&&!dr.has(i)) p.push(i);
-  return p;
+  const ex=parseList(S.exclude), dr=S.repeat?new Set():drawnSet();
+  return allEntries().filter(e=>!ex.has(e.n)&&!dr.has(e.n));
 }
-function totalCount(){const ex=parseList(S.exclude); let c=0; for(let i=S.min;i<=S.max;i++) if(!ex.has(i)) c++; return c;}
+function totalCount(){const ex=parseList(S.exclude); return allEntries().filter(e=>!ex.has(e.n)).length;}
+function noWidth(){
+  if(rosterMode()){let w=1; for(const r of S.roster) w=Math.max(w,r.w||0,String(r.n).length); return w;}
+  return String(S.max).length;
+}
+function fmt(n){return S.pad?String(n).padStart(noWidth(),'0'):String(n);}
+function textLen(s){let w=0; for(const ch of String(s)) w+=/[\u0000-ɏ]/.test(ch)?0.6:1; return w;}
+function maxNameLen(){let m=0; if(rosterMode()) for(const r of S.roster) m=Math.max(m,textLen(r.name||'')); return Math.min(m,12);}
+function label(p){return fmt(p.n)+(p.name?' '+p.name:'');}
 
-// 公平亂數：crypto + 拒絕取樣，避免取餘數偏差
+// 公平亂數：crypto + 拒絕取樣
 function randInt(n){
   const a=new Uint32Array(1), lim=Math.floor(0x100000000/n)*n; let x;
   do{crypto.getRandomValues(a); x=a[0];}while(x>=lim);
@@ -212,63 +308,84 @@ function pick(pool,k){
   for(let i=0;i<k;i++){const j=i+randInt(p.length-i); [p[i],p[j]]=[p[j],p[i]];}
   return p.slice(0,k);
 }
-function fmt(n){return S.pad?String(n).padStart(String(S.max).length,'0'):String(n);}
 
 /* ---------- 版面 ---------- */
 const cardsEl=$('cards'), stage=$('stage');
-function digits(){return Math.max(String(S.max).length,1);}
+function applyView(){
+  const root=document.documentElement.style;
+  root.setProperty('--ui',S.uiScale/100);
+  root.setProperty('--ts',S.titleScale/100);
+  $('title').textContent=S.title; document.title=S.title;
+}
 function layout(){
-  const k=cardsEl.children.length||1, r=stage.getBoundingClientRect();
-  const W=r.width-24, H=r.height-40, d=digits(), ratio=d*0.72+0.5;
-  let best=0,bc=1,bg=0;
-  for(let c=1;c<=k;c++){
-    const rows=Math.ceil(k/c), gap=Math.min(W,H)*0.035;
+  const k=cardsEl.children.length||1, r=stage.getBoundingClientRect(), cs=getComputedStyle(stage);
+  const W=r.width-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)-8;
+  const H=r.height-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom)-8;
+  const d=noWidth(), nl=maxNameLen(), ns=S.nameScale/100, numW=d*0.72+0.2;
+  const shapes=nl>0?[
+    {cls:'v',w:Math.max(numW,nl*ns)+0.6,h:1+ns*1.32+0.5},
+    {cls:'h',w:numW+0.45*1+nl*ns+0.8,h:1.45}
+  ]:[{cls:'h',w:numW+0.5,h:1.3}];
+  let best={fs:0,c:1,gap:0,sh:shapes[0]};
+  for(const sh of shapes) for(let c=1;c<=k;c++){
+    const rows=Math.ceil(k/c), gap=Math.min(W,H)*0.03;
     const cw=(W-gap*(c-1))/c, ch=(H-gap*(rows-1))/rows;
-    const fs=Math.min(cw/ratio, ch/1.3);
-    if(fs>best){best=fs;bc=c;bg=gap;}
+    if(cw<=0||ch<=0) continue;
+    const fs=Math.min(cw/sh.w,ch/sh.h);
+    if(fs>best.fs) best={fs,c,gap,sh};
   }
-  best=Math.max(12,best);
-  const cw=best*ratio, ch=best*1.3;
-  cardsEl.style.gap=bg+'px';
-  cardsEl.style.maxWidth=(bc*cw+(bc-1)*bg+1)+'px';
-  for(const el of cardsEl.children){el.style.fontSize=best+'px';el.style.width=cw+'px';el.style.height=ch+'px';}
+  const fs=Math.max(10,best.fs*S.numScale/100), cw=fs*best.sh.w, ch=fs*best.sh.h, gap=best.gap*S.numScale/100;
+  cardsEl.style.gap=gap+'px';
+  cardsEl.style.maxWidth=(best.c*cw+(best.c-1)*gap+1)+'px';
+  for(const el of cardsEl.children){
+    el.classList.remove('v','h'); el.classList.add(best.sh.cls);
+    el.style.fontSize=fs+'px'; el.style.width=cw+'px'; el.style.height=ch+'px';
+    const nm=el.querySelector('.nm'); if(nm) nm.style.fontSize=ns+'em';
+  }
 }
-function setCards(values,cls){
+function fillCard(el,it){
+  el.querySelector('.no').textContent=it?fmt(it.n):'?';
+  const nm=el.querySelector('.nm'); if(nm) nm.textContent=it?(it.name||''):'';
+}
+function setCards(items,cls){
   cardsEl.innerHTML='';
-  for(const v of values){const d=document.createElement('div'); d.className='card '+(cls||''); d.textContent=v; cardsEl.appendChild(d);}
+  const named=maxNameLen()>0;
+  for(const it of items){
+    const d=document.createElement('div'); d.className='card '+(cls||'');
+    d.innerHTML='<div class="no"></div>'+(named?'<div class="nm"></div>':'');
+    fillCard(d,it); cardsEl.appendChild(d);
+  }
   layout();
-}
-function showIdle(){
-  const last=S.history[S.history.length-1];
-  if(last&&cyc(last)===S.cycle){setCards(last.nums.map(fmt)); $('msg').textContent=resultMsg(last);}
-  else{setCards(Array(S.per).fill('?'),'idle');
-    $('msg').textContent=S.cycle>1?'第 '+S.cycle+' 回開始：所有號碼重新加入，按「抽獎」繼續':'按「抽獎」或空白鍵開始';}
 }
 function resultMsg(h){
   const left=getPool().length;
-  return (S.cycle>1?'第 '+cyc(h)+' 回 · ':'')+'第 '+h.round+' 輪結果'+(left===0?'　—　本回號碼已全部抽完，可按「再抽一回」繼續':'');
+  return (S.cycle>1?'第 '+cyc(h)+' 回 · ':'')+'第 '+h.round+' 輪結果'+(left===0?'　—　本回已全部抽完，可按「再抽一回」繼續':'');
 }
-function nextCycle(){
-  if(busy) return;
-  if(!confirm('本回所有號碼都已抽完。\n要開始第 '+(S.cycle+1)+' 回，讓所有號碼重新加入抽獎嗎？\n（之前的紀錄會保留）')) return;
-  S.cycle++; save(); render(); showIdle(); toast('第 '+S.cycle+' 回開始');
+function showIdle(){
+  const last=S.history[S.history.length-1];
+  if(last&&cyc(last)===S.cycle){setCards(last.picks); $('msg').textContent=resultMsg(last);}
+  else{setCards(Array(S.per).fill(null),'idle');
+    $('msg').textContent=S.cycle>1?'第 '+S.cycle+' 回開始：所有人重新加入，按「抽獎」繼續':'按「抽獎」或空白鍵開始';}
 }
 function render(){
-  $('title').textContent=S.title; document.title=S.title;
+  applyView();
   $('per').textContent=S.per;
-  const pool=getPool().length, tot=totalCount();
-  $('status').innerHTML=(S.cycle>1?'第 <b>'+S.cycle+'</b> 回　·　':'')+'剩餘 <b>'+pool+'</b> / 共 '+tot+' 個號碼　·　已抽 '+S.history.length+' 輪';
+  const pool=getPool().length, tot=totalCount(), unit=rosterMode()?'人':'個號碼';
+  $('status').innerHTML=(S.cycle>1?'第 <b>'+S.cycle+'</b> 回　·　':'')+'剩餘 <b>'+pool+'</b> / 共 '+tot+' '+unit+'　·　已抽 '+S.history.length+' 輪';
   $('drawBtn').disabled=busy||tot===0;
   $('drawBtn').textContent=pool===0&&tot>0?'再抽一回':'抽獎';
+  $('setBtn').disabled=busy;
   renderHist();
+  if($('setDrawer').classList.contains('open')) renderSettingsInfo();
 }
 function renderHist(){
   const ul=$('histList'); ul.innerHTML='';
-  if(!S.history.length){ul.innerHTML='<li style="color:var(--muted)">尚無紀錄</li>';}
+  if(!S.history.length) ul.innerHTML='<li style="color:var(--muted)">尚無紀錄</li>';
   for(let i=S.history.length-1;i>=0;i--){
     const h=S.history[i], li=document.createElement('li'), t=new Date(h.t);
-    li.innerHTML='<div class="rt">'+(S.cycle>1?'第 '+cyc(h)+' 回 · ':'')+'第 '+h.round+' 輪　'+t.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+'</div>'+
-      h.nums.map(n=>'<span class="chip">'+fmt(n)+'</span>').join('');
+    li.innerHTML='<div class="rt">'+(S.cycle>1||cyc(h)>1?'第 '+cyc(h)+' 回 · ':'')+'第 '+h.round+' 輪　'+
+      t.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+'</div>'+
+      h.picks.map(p=>'<span class="chip">'+fmt(p.n)+(p.name?'<small>'+esc(p.name)+'</small>':'')+'</span>').join('');
     ul.appendChild(li);
   }
   $('undoBtn').disabled=!S.history.length;
@@ -276,40 +393,50 @@ function renderHist(){
 }
 
 /* ---------- 抽獎 ---------- */
+function nextCycle(){
+  if(busy) return;
+  if(!confirm('本回所有人都已抽完。\n要開始第 '+(S.cycle+1)+' 回，讓所有人重新加入抽獎嗎？\n（之前的紀錄會保留）')) return;
+  S.cycle++; save(); render(); showIdle(); toast('第 '+S.cycle+' 回開始');
+}
 function draw(){
-  if(busy||isOpen()) return;
+  if(busy) return;
   const pool=getPool();
-  if(!pool.length){if(totalCount()) nextCycle(); else toast('沒有可抽的號碼，請到設定調整'); return;}
+  if(!pool.length){if(totalCount()) nextCycle(); else toast('沒有可抽的人，請到設定匯入名單或調整範圍'); return;}
   const k=Math.min(S.per,pool.length);
-  if(k<S.per) toast('剩餘號碼不足，本輪只抽 '+k+' 個');
+  if(k<S.per) toast('本回剩餘人數不足，本輪只抽 '+k+' 位');
   const res=pick(pool,k);
-  busy=true; render(); keepAwake();
+  busy=true; render(); keepAwake(); closeDrawers();
   $('msg').textContent='抽獎中…';
-  setCards(Array(k).fill(fmt(pool[0])),'rolling');
+  setCards(res.map(()=>pool[randInt(pool.length)]),'rolling');
   const cards=[...cardsEl.children], t0=performance.now();
-  const step=k>8?120:k>3?250:450;
-  const stops=cards.map((_,i)=>1600+i*step);
-  const done=new Array(k).fill(false);
-  let lastTick=0;
-  const timer=setInterval(()=>frame(performance.now()),30);
-  function frame(now){
-    const el=now-t0; let all=true;
+  const rollMs=Math.max(300,S.rollSec*1000), stg=Math.max(0,S.staggerSec*1000);
+  const stops=res.map((_,i)=>rollMs+i*stg), next=new Array(k).fill(0), done=new Array(k).fill(false);
+  let lastBeep=0;
+  const timer=setInterval(()=>{
+    const now=performance.now(), el=now-t0; let all=true, changed=false;
     for(let i=0;i<k;i++){
       if(done[i]) continue;
       if(el>=stops[i]){
-        done[i]=true; cards[i].textContent=fmt(res[i]);
-        cards[i].className='card hit'; beep(880,.12,.08,'triangle');
-      }else{all=false; if(now-lastTick>55) cards[i].textContent=fmt(pool[randInt(pool.length)]);}
+        done[i]=true; fillCard(cards[i],res[i]);
+        cards[i].classList.remove('rolling'); cards[i].classList.add('hit'); beep(880,.15,.08,'triangle');
+      }else{
+        all=false;
+        if(now>=next[i]){
+          const p=el/stops[i];                       // 越接近停止越慢
+          next[i]=now+45+Math.pow(p,4)*420;
+          fillCard(cards[i],pool[randInt(pool.length)]); changed=true;
+        }
+      }
     }
-    if(now-lastTick>55){lastTick=now; if(!all) beep(300+Math.random()*200,.03,.025);}
+    if(changed&&now-lastBeep>45){lastBeep=now; beep(300+Math.random()*200,.03,.025);}
     if(!all) return;
     clearInterval(timer);
-    S.history.push({round:S.history.length+1,cycle:S.cycle,nums:res,t:Date.now()});
+    S.history.push({round:S.history.length+1,cycle:S.cycle,picks:res.map(p=>({n:p.n,name:p.name||''})),t:Date.now()});
     save(); busy=false;
     chime(); confetti(); render();
     $('msg').textContent=resultMsg(S.history[S.history.length-1]);
-    if(!getPool().length) toast('本回號碼已全部抽完');
-  }
+    if(!getPool().length) toast('本回已全部抽完');
+  },25);
 }
 
 /* ---------- 音效 ---------- */
@@ -331,10 +458,11 @@ const cv=$('fx'), cx=cv.getContext('2d'); let parts=[], raf=0;
 function resizeFx(){const d=window.devicePixelRatio||1; cv.width=innerWidth*d; cv.height=innerHeight*d;}
 function confetti(){
   const d=window.devicePixelRatio||1, W=cv.width, H=cv.height, cols=['#ffd36b','#ff4d4d','#ffffff','#ffb020','#ff7aa8','#7ad7ff'];
-  for(let i=0;i<220;i++){
+  const sp=Math.min(W,H)/800;
+  for(let i=0;i<240;i++){
     const left=i%2===0;
-    parts.push({x:left?0:W,y:H*.75,vx:(left?1:-1)*(4+Math.random()*10)*d,vy:-(8+Math.random()*12)*d,
-      r:(6+Math.random()*8)*d,a:Math.random()*6.28,va:(Math.random()-.5)*.4,c:cols[i%cols.length]});
+    parts.push({x:left?0:W,y:H*.7,vx:(left?1:-1)*(4+Math.random()*10)*d*sp*1.4,vy:-(10+Math.random()*16)*d*sp*1.4,
+      r:(6+Math.random()*8)*d*Math.max(1,sp),a:Math.random()*6.28,va:(Math.random()-.5)*.4,c:cols[i%cols.length]});
   }
   if(!raf) raf=requestAnimationFrame(tickFx);
 }
@@ -343,7 +471,7 @@ function tickFx(){
   cx.clearRect(0,0,cv.width,cv.height);
   parts=parts.filter(p=>p.y<cv.height+50);
   for(const p of parts){
-    p.vx*=.985; p.vy+=.25*d; if(p.vy>4*d) p.vy=4*d;
+    p.vx*=.985; p.vy+=.3*d; if(p.vy>5*d) p.vy=5*d;
     p.x+=p.vx; p.y+=p.vy; p.a+=p.va;
     cx.save(); cx.translate(p.x,p.y); cx.rotate(p.a); cx.fillStyle=p.c;
     cx.fillRect(-p.r/2,-p.r/4,p.r,p.r/2*Math.abs(Math.cos(p.a*2))+1); cx.restore();
@@ -352,10 +480,270 @@ function tickFx(){
   if(!raf) cx.clearRect(0,0,cv.width,cv.height);
 }
 
-/* ---------- 其他功能 ---------- */
+/* ---------- Excel / CSV 匯入 ---------- */
+// 讀 xlsx（zip + XML），不需要外部函式庫；舊瀏覽器或 .xls 才改用 SheetJS
+async function readZip(buf){
+  const dv=new DataView(buf), u8=new Uint8Array(buf); let e=-1;
+  for(let i=buf.byteLength-22;i>=Math.max(0,buf.byteLength-65557);i--){if(dv.getUint32(i,true)===0x06054b50){e=i;break;}}
+  if(e<0) throw new Error('不是有效的 xlsx 檔案');
+  const cnt=dv.getUint16(e+10,true); let p=dv.getUint32(e+16,true); const files={};
+  for(let i=0;i<cnt;i++){
+    if(dv.getUint32(p,true)!==0x02014b50) break;
+    const method=dv.getUint16(p+10,true), csize=dv.getUint32(p+20,true), nl=dv.getUint16(p+28,true), xl=dv.getUint16(p+30,true), cl=dv.getUint16(p+32,true), off=dv.getUint32(p+42,true);
+    files[new TextDecoder().decode(u8.subarray(p+46,p+46+nl))]={method,csize,off}; p+=46+nl+xl+cl;
+  }
+  return async name=>{
+    const f=files[name]; if(!f) return null;
+    const start=f.off+30+dv.getUint16(f.off+26,true)+dv.getUint16(f.off+28,true), data=u8.subarray(start,start+f.csize);
+    let out;
+    if(f.method===0) out=data;
+    else if(f.method===8) out=new Uint8Array(await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
+    else throw new Error('不支援的壓縮格式');
+    return new TextDecoder().decode(out);
+  };
+}
+function colIdx(s){let n=0; for(const c of s) n=n*26+c.charCodeAt(0)-64; return n-1;}
+async function parseXlsxNative(buf){
+  const get=await readZip(buf), X=s=>new DOMParser().parseFromString(s,'application/xml');
+  const wb=X(await get('xl/workbook.xml')), rels=X(await get('xl/_rels/workbook.xml.rels')), relMap={};
+  for(const r of rels.getElementsByTagName('Relationship')) relMap[r.getAttribute('Id')]=r.getAttribute('Target');
+  const ss=[], sst=await get('xl/sharedStrings.xml');
+  if(sst) for(const si of X(sst).getElementsByTagName('si')){let t=''; for(const x of si.getElementsByTagName('t')) if(x.parentNode.nodeName!=='rPh') t+=x.textContent; ss.push(t);}
+  const out=[];
+  for(const sh of wb.getElementsByTagName('sheet')){
+    const rid=sh.getAttribute('r:id')||sh.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id');
+    let tgt=relMap[rid]; if(!tgt) continue;
+    tgt=tgt.startsWith('/')?tgt.slice(1):'xl/'+tgt.replace(/^\.\//,'');
+    const xml=await get(tgt); if(!xml) continue;
+    const grid=[];
+    for(const c of X(xml).getElementsByTagName('c')){
+      const m=(c.getAttribute('r')||'').match(/^([A-Z]+)(\d+)$/); if(!m) continue;
+      const t=c.getAttribute('t'); let v;
+      if(t==='inlineStr') v=[...c.getElementsByTagName('t')].map(x=>x.textContent).join('');
+      else{const ve=c.getElementsByTagName('v')[0]; if(!ve) continue; v=ve.textContent; if(t==='s') v=ss[+v]||'';}
+      const r=+m[2]-1; (grid[r]=grid[r]||[])[colIdx(m[1])]=v;
+    }
+    out.push({name:sh.getAttribute('name'),grid});
+  }
+  return out;
+}
+function loadScript(src){return new Promise((ok,no)=>{const s=document.createElement('script'); s.src=src; s.onload=ok; s.onerror=()=>no(new Error('無法載入 Excel 解析元件（需要網路）')); document.head.appendChild(s);});}
+async function parseWithSheetJS(buf){
+  if(!window.XLSX) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+  const wb=XLSX.read(buf,{type:'array'});
+  return wb.SheetNames.map(n=>({name:n,grid:XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:false,defval:''})}));
+}
+function decodeText(buf){
+  try{return new TextDecoder('utf-8',{fatal:true}).decode(buf).replace(/^﻿/,'');}
+  catch(e){try{return new TextDecoder('big5').decode(buf);}catch(e2){return new TextDecoder().decode(buf);}}
+}
+function parseCSV(text){
+  const rows=[]; let row=[], cell='', q=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(q){if(ch==='"'){if(text[i+1]==='"'){cell+='"';i++;}else q=false;}else cell+=ch;}
+    else if(ch==='"') q=true;
+    else if(ch===','||ch==='\t'){row.push(cell);cell='';}
+    else if(ch==='\n'){row.push(cell);rows.push(row);row=[];cell='';}
+    else if(ch!=='\r') cell+=ch;
+  }
+  if(cell||row.length){row.push(cell);rows.push(row);}
+  return rows;
+}
+async function readSpreadsheet(file){
+  const buf=await file.arrayBuffer(), name=file.name.toLowerCase();
+  if(name.endsWith('.csv')||name.endsWith('.txt')) return [{name:file.name,grid:parseCSV(decodeText(buf))}];
+  if(name.endsWith('.xlsx')&&typeof DecompressionStream!=='undefined'){
+    try{return await parseXlsxNative(buf);}catch(e){console.warn(e);}
+  }
+  return parseWithSheetJS(buf);
+}
+function cleanName(s){return String(s==null?'':s).replace(/\s+/g,' ').trim().replace(/([㐀-鿿])\s+(?=[㐀-鿿])/g,'$1');}
+// 找出「姓名」與「編號」欄（可處理同一列有好幾組並排的名冊）
+function extractRoster(grid){
+  const isName=s=>/姓名/.test(s), isNo=s=>/編號|號碼|序號|^no\.?$/i.test(s);
+  for(let r=0;r<Math.min(grid.length,20);r++){
+    const row=(grid[r]||[]).map(x=>String(x==null?'':x).replace(/\s+/g,''));
+    const nameCols=[], noCols=[];
+    row.forEach((v,i)=>{if(isName(v)) nameCols.push(i); else if(isNo(v)) noCols.push(i);});
+    if(!nameCols.length||!noCols.length) continue;
+    const used=new Set(), pairs=[];
+    for(const nc of nameCols){
+      const cand=noCols.filter(c=>!used.has(c)).sort((a,b)=>Math.abs(a-nc)-Math.abs(b-nc)||b-a);
+      if(cand.length){used.add(cand[0]); pairs.push([cand[0],nc]);}
+    }
+    const items=[], seen=new Set(), dupes=[];
+    for(let rr=r+1;rr<grid.length;rr++){
+      for(const [noc,nc] of pairs){
+        const raw=String((grid[rr]||[])[noc]==null?'':(grid[rr]||[])[noc]).trim();
+        if(!/^\d+$/.test(raw)) continue;
+        const n=+raw, name=cleanName((grid[rr]||[])[nc]);
+        if(seen.has(n)){dupes.push(raw); continue;}
+        seen.add(n); items.push({n,name,w:raw.length});
+      }
+    }
+    if(items.length){items.sort((a,b)=>a.n-b.n); return {items,dupes};}
+  }
+  return {items:[],dupes:[]};
+}
+function parsePasted(text){
+  const items=[], seen=new Set(), dupes=[];
+  for(const line of String(text).split(/\r?\n/)){
+    const m=line.match(/^\s*(\d+)\s*(?:[\t,，、:：]|\s)\s*(.*?)\s*$/)||line.match(/^\s*(\d+)\s*$/);
+    if(!m) continue;
+    const n=+m[1]; if(seen.has(n)){dupes.push(m[1]); continue;}
+    seen.add(n); items.push({n,name:cleanName(m[2]||''),w:m[1].length});
+  }
+  items.sort((a,b)=>a.n-b.n);
+  return {items,dupes};
+}
+function applyRoster(items,src){
+  if(!items.length){toast('沒有可匯入的資料'); return false;}
+  if((S.history.length||S.exclude.trim()||S.roster.length)&&
+     !confirm('匯入後會取代目前名單，並清除「抽獎紀錄」與「排除號碼」。\n確定要匯入 '+items.length+' 人嗎？')) return false;
+  S.roster=items; S.rosterSrc=src; S.history=[]; S.cycle=1; S.exclude='';
+  save(); syncForm(); render(); showIdle(); toast('已匯入 '+items.length+' 人');
+  return true;
+}
+let impCands=[];
+async function onFile(file){
+  const box=$('impRes'); box.innerHTML='<div class="box">讀取中…</div>';
+  let sheets;
+  try{sheets=await readSpreadsheet(file);}catch(e){box.innerHTML='<div class="box err">讀取失敗：'+esc(e.message||e)+'<br>可改用下方「直接貼上名單」。</div>'; return;}
+  impCands=sheets.map(s=>Object.assign({name:s.name},extractRoster(s.grid))).filter(c=>c.items.length);
+  if(!impCands.length){box.innerHTML='<div class="box err">找不到「姓名」和「編號」欄位。<br>請確認 Excel 有這兩個標題，或改用下方「直接貼上名單」。</div>'; return;}
+  const opts=impCands.map((c,i)=>'<option value="'+i+'">'+esc(c.name)+'（'+c.items.length+' 人）</option>').join('');
+  box.innerHTML='<div class="box">'+(impCands.length>1?'<div class="field"><label>選擇工作表</label><select id="impSheet">'+opts+'</select></div>':'<div>工作表：'+esc(impCands[0].name)+'</div>')+
+    '<div id="impPrev" class="hint"></div><div class="btnRow"><button class="btn gold" id="impApply">套用這份名單</button><button class="btn" id="impCancel">取消</button></div></div>';
+  const prev=()=>{
+    const c=impCands[+($('impSheet')?$('impSheet').value:0)], it=c.items, pn=p=>p.w?String(p.n).padStart(p.w,'0'):String(p.n);
+    $('impPrev').innerHTML='共 <b>'+it.length+'</b> 人，編號 '+esc(pn(it[0]))+'～'+esc(pn(it[it.length-1]))+'<br>'+
+      it.slice(0,6).map(p=>esc(pn(p)+' '+p.name)).join('、')+(it.length>6?'…':'')+
+      (c.dupes.length?'<br><span class="err">重複的編號已略過：'+esc(c.dupes.join(', '))+'</span>':'');
+  };
+  if($('impSheet')) $('impSheet').onchange=prev;
+  prev();
+  $('impApply').onclick=()=>{const c=impCands[+($('impSheet')?$('impSheet').value:0)]; if(applyRoster(c.items,file.name+' / '+c.name)) box.innerHTML='';};
+  $('impCancel').onclick=()=>{box.innerHTML='';};
+}
+
+/* ---------- 設定面板 ---------- */
+const sliders=[
+  ['sTitle','titleScale','vTitle',v=>v+'%'],
+  ['sNum','numScale','vNum',v=>v+'%'],
+  ['sName','nameScale','vName',v=>v+'%'],
+  ['sUi','uiScale','vUi',v=>v+'%'],
+  ['sRoll','rollSec','vRoll',v=>v+' 秒'],
+  ['sStag','staggerSec','vStag',v=>v+' 秒'],
+];
+function syncForm(){
+  $('fTitle').value=S.title; $('fMin').value=S.min; $('fMax').value=S.max; $('fEx').value=S.exclude;
+  $('fPad').checked=S.pad; $('fRepeat').checked=S.repeat; $('fSound').checked=S.sound;
+  for(const [id,key,vid,f] of sliders){$(id).value=S[key]; $(vid).textContent=f(S[key]);}
+  renderSettingsInfo();
+}
+function renderSettingsInfo(){
+  const rm=rosterMode();
+  $('rangeBox').style.display=rm?'none':'';
+  $('clearRosterBtn').style.display=rm?'':'none';
+  $('rosterStatus').innerHTML=rm?
+    '目前名單：<b>'+S.roster.length+'</b> 人'+(S.rosterSrc?'<div class="hint">來源：'+esc(S.rosterSrc)+'</div>':''):
+    '目前沒有名單，以號碼範圍 <b>'+S.min+'～'+S.max+'</b> 抽獎';
+  const ex=parseList(S.exclude), dr=drawnSet(), ul=$('rosterList');
+  ul.style.display=rm?'':'none'; ul.innerHTML='';
+  if(rm){
+    const frag=document.createDocumentFragment();
+    for(const r of S.roster){
+      const li=document.createElement('li'); if(ex.has(r.n)) li.className='ex';
+      li.innerHTML='<span class="rn">'+fmt(r.n)+'</span><span class="rnm">'+esc(r.name||'（無姓名）')+'</span>'+
+        (ex.has(r.n)?'<span class="tag">排除</span>':'')+(dr.has(r.n)?'<span class="tag win">已中獎</span>':'')+
+        (r.manual?'<span class="tag">手動</span><button class="btn small" data-del="'+r.n+'">刪除</button>':'');
+      frag.appendChild(li);
+    }
+    ul.appendChild(frag);
+  }
+  const all=allEntries(), byN=new Map(all.map(e=>[e.n,e])), exl=[...ex].sort((a,b)=>a-b);
+  if(!exl.length){$('exInfo').textContent='';}
+  else{
+    const hit=exl.filter(n=>byN.has(n)), miss=exl.filter(n=>!byN.has(n));
+    $('exInfo').innerHTML='目前排除 <b>'+hit.length+'</b> '+(rm?'人':'個')+(hit.length?'：'+esc(hit.slice(0,30).map(n=>label(byN.get(n))).join('、'))+(hit.length>30?'…':''):'')+
+      (miss.length?'<br><span class="err">名單中沒有這些編號：'+esc(miss.slice(0,20).join(', '))+(miss.length>20?'…':'')+'</span>':'');
+  }
+}
+function openDrawer(id){
+  if(busy&&id==='setDrawer') return;
+  for(const d of document.querySelectorAll('.drawer')) if(d.id!==id) d.classList.remove('open');
+  const el=$(id), open=!el.classList.contains('open');
+  el.classList.toggle('open',open);
+  if(open&&id==='setDrawer') syncForm();
+}
+function closeDrawers(){for(const d of document.querySelectorAll('.drawer')) d.classList.remove('open');}
+function anyDrawerOpen(){return !!document.querySelector('.drawer.open');}
+
+for(const [id,key,vid,f] of sliders){
+  $(id).addEventListener('input',()=>{
+    S[key]=parseFloat($(id).value); $(vid).textContent=f(S[key]); save(); applyView(); layout();
+  });
+}
+$('fTitle').addEventListener('input',()=>{S.title=$('fTitle').value||DEF.title; save(); applyView(); requestAnimationFrame(layout);});
+$('fPad').onchange=()=>{S.pad=$('fPad').checked; save(); render(); showIdle();};
+$('fRepeat').onchange=()=>{S.repeat=$('fRepeat').checked; save(); render();};
+$('fSound').onchange=()=>{S.sound=$('fSound').checked; save();};
+$('fEx').addEventListener('input',()=>{S.exclude=$('fEx').value; save(); render();});
+function onRange(){
+  const mn=parseInt($('fMin').value,10), mx=parseInt($('fMax').value,10);
+  if(!Number.isFinite(mn)||!Number.isFinite(mx)||mn<0||mx<0){toast('請輸入有效的起始與結束號碼'); return;}
+  if(mn>mx){toast('起始號碼不能大於結束號碼'); return;}
+  if(mx-mn+1>MAX_RANGE){toast('號碼範圍最多 '+MAX_RANGE+' 個'); return;}
+  S.min=mn; S.max=mx; save(); render(); showIdle();
+}
+$('fMin').onchange=onRange; $('fMax').onchange=onRange;
+
+$('importBtn').onclick=()=>$('fileIn').click();
+$('fileIn').onchange=()=>{const f=$('fileIn').files[0]; $('fileIn').value=''; if(f) onFile(f);};
+$('pasteBtn').onclick=()=>{
+  const r=parsePasted($('pasteIn').value);
+  if(!r.items.length){toast('看不懂貼上的內容，每行請用「編號 姓名」'); return;}
+  if(applyRoster(r.items,'貼上的名單')){$('pasteIn').value=''; if(r.dupes.length) toast('重複的編號已略過：'+r.dupes.join(', '));}
+};
+$('addBtn').onclick=()=>{
+  const name=cleanName($('addName').value); let n=parseInt($('addNo').value,10);
+  if(!name){toast('請輸入姓名'); $('addName').focus(); return;}
+  if(!rosterMode()){ // 號碼範圍模式 → 先轉成名單，再加入
+    const w=String(S.max).length; S.roster=[]; for(let i=S.min;i<=S.max;i++) S.roster.push({n:i,name:'',w});
+  }
+  const maxN=S.roster.reduce((m,r)=>Math.max(m,r.n),0);
+  if(!Number.isFinite(n)) n=maxN+1;
+  if(n<0){toast('編號不能是負數'); return;}
+  const ex=S.roster.find(r=>r.n===n);
+  if(ex){toast('編號 '+fmt(n)+' 已經是「'+(ex.name||'無姓名')+'」'); return;}
+  S.roster.push({n,name,w:noWidth(),manual:true}); S.roster.sort((a,b)=>a.n-b.n);
+  if(!S.rosterSrc) S.rosterSrc='手動建立';
+  save(); $('addNo').value=''; $('addName').value=''; render(); renderSettingsInfo();
+  if(!busy&&!S.history.some(h=>cyc(h)===S.cycle)) showIdle();
+  toast('已新增 '+fmt(n)+' '+name);
+};
+$('addName').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault(); $('addBtn').click();}});
+$('rosterList').onclick=e=>{
+  const b=e.target.closest('[data-del]'); if(!b) return;
+  const n=+b.dataset.del, r=S.roster.find(x=>x.n===n); if(!r) return;
+  if(!confirm('刪除手動新增的 '+fmt(n)+' '+(r.name||'')+'？')) return;
+  S.roster=S.roster.filter(x=>x!==r); save(); render(); renderSettingsInfo();
+};
+$('clearRosterBtn').onclick=()=>{
+  if(!confirm('清除名單後改回「號碼範圍」模式，並清除抽獎紀錄與排除號碼。確定？')) return;
+  S.roster=[]; S.rosterSrc=''; S.history=[]; S.cycle=1; S.exclude='';
+  save(); syncForm(); render(); showIdle(); toast('名單已清除');
+};
+$('resetViewBtn').onclick=()=>{Object.assign(S,VIEW_DEF); save(); syncForm(); applyView(); layout(); toast('已恢復預設');};
+$('resetBtn').onclick=()=>{
+  if(!confirm('確定清除所有抽獎紀錄？此動作無法復原。')) return;
+  S.history=[]; S.cycle=1; save(); render(); showIdle(); toast('紀錄已清除');
+};
+
+/* ---------- 其他 ---------- */
 let toastT=0;
-function toast(t){const el=$('toast'); el.textContent=t; el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),2200);}
-function isOpen(){return $('setMask').classList.contains('open');}
+function toast(t){const el=$('toast'); el.textContent=t; el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),2600);}
 
 let wl=null;
 async function keepAwake(){try{if(navigator.wakeLock&&!wl){wl=await navigator.wakeLock.request('screen'); wl.addEventListener('release',()=>{wl=null;});}}catch(e){}}
@@ -364,7 +752,7 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 function toggleFs(){
   const d=document, el=d.documentElement;
   try{
-    if(d.fullscreenElement||d.webkitFullscreenElement){(d.exitFullscreen||d.webkitExitFullscreen).call(d);}
+    if(d.fullscreenElement||d.webkitFullscreenElement) (d.exitFullscreen||d.webkitExitFullscreen).call(d);
     else{(el.requestFullscreen||el.webkitRequestFullscreen).call(el); keepAwake();}
   }catch(e){toast('此瀏覽器不支援全螢幕');}
 }
@@ -373,54 +761,37 @@ function copyText(t){
     try{document.execCommand('copy'); toast('已複製');}catch(e){toast('複製失敗');} ta.remove();};
   if(navigator.clipboard&&window.isSecureContext) navigator.clipboard.writeText(t).then(()=>toast('已複製'),fallback); else fallback();
 }
-
-$('drawBtn').onclick=draw;
 function setPer(n){
   if(busy) return;
   S.per=Math.max(1,Math.min(MAX_PER,n)); save(); render();
-  setCards(Array(S.per).fill('?'),'idle'); $('msg').textContent='每次抽 '+S.per+' 個';
+  setCards(Array(S.per).fill(null),'idle'); $('msg').textContent='每次抽 '+S.per+' 位';
 }
+
+$('drawBtn').onclick=draw;
 $('minus').onclick=()=>setPer(S.per-1);
 $('plus').onclick=()=>setPer(S.per+1);
 $('fsBtn').onclick=toggleFs;
-$('histBtn').onclick=()=>$('drawer').classList.toggle('open');
-$('closeHist').onclick=()=>$('drawer').classList.remove('open');
-$('copyBtn').onclick=()=>copyText(S.history.map(h=>(S.cycle>1?'第'+cyc(h)+'回 ':'')+'第'+h.round+'輪：'+h.nums.map(fmt).join(', ')).join('\n'));
+$('histBtn').onclick=()=>openDrawer('histDrawer');
+$('setBtn').onclick=()=>openDrawer('setDrawer');
+for(const b of document.querySelectorAll('[data-close]')) b.onclick=closeDrawers;
+$('copyBtn').onclick=()=>copyText(S.history.map(h=>((S.cycle>1||cyc(h)>1)?'第'+cyc(h)+'回 ':'')+'第'+h.round+'輪：'+h.picks.map(label).join('、')).join('\n'));
 $('undoBtn').onclick=()=>{
   if(busy||!S.history.length) return;
   const h=S.history[S.history.length-1];
-  if(!confirm('確定復原第 '+h.round+' 輪？\n號碼 '+h.nums.map(fmt).join(', ')+' 會放回抽獎池。')) return;
+  if(!confirm('確定復原第 '+h.round+' 輪？\n'+h.picks.map(label).join('、')+'\n會放回抽獎池。')) return;
   S.history.pop(); S.cycle=cyc(h); save(); render(); showIdle(); toast('已復原第 '+h.round+' 輪');
 };
-$('setBtn').onclick=()=>{
-  if(busy) return;
-  $('fTitle').value=S.title; $('fMin').value=S.min; $('fMax').value=S.max; $('fEx').value=S.exclude;
-  $('fPad').checked=S.pad; $('fRepeat').checked=S.repeat; $('fSound').checked=S.sound;
-  $('setMask').classList.add('open');
-};
-$('cancelSet').onclick=()=>$('setMask').classList.remove('open');
-$('setMask').onclick=e=>{if(e.target===$('setMask')) $('setMask').classList.remove('open');};
-$('saveSet').onclick=()=>{
-  const mn=parseInt($('fMin').value,10), mx=parseInt($('fMax').value,10);
-  if(!Number.isFinite(mn)||!Number.isFinite(mx)||mn<0||mx<0){alert('請輸入有效的起始與結束號碼'); return;}
-  if(mn>mx){alert('起始號碼不能大於結束號碼'); return;}
-  if(mx-mn+1>MAX_RANGE){alert('號碼範圍最多 '+MAX_RANGE+' 個'); return;}
-  S.title=$('fTitle').value.trim()||'尾牙抽獎'; S.min=mn; S.max=mx; S.exclude=$('fEx').value.trim();
-  S.pad=$('fPad').checked; S.repeat=$('fRepeat').checked; S.sound=$('fSound').checked;
-  save(); $('setMask').classList.remove('open'); render(); showIdle(); toast('設定已儲存');
-};
-$('resetBtn').onclick=()=>{
-  if(!confirm('確定清除所有抽獎紀錄？此動作無法復原。')) return;
-  S.history=[]; S.cycle=1; save(); $('setMask').classList.remove('open'); render(); showIdle(); toast('紀錄已清除');
-};
-
+// 按鈕點完就取消焦點，讓空白鍵永遠是「抽獎」
+document.addEventListener('click',e=>{const b=e.target.closest('button'); if(b) setTimeout(()=>b.blur(),0);});
 document.addEventListener('keydown',e=>{
-  if(isOpen()){if(e.key==='Escape') $('setMask').classList.remove('open'); return;}
-  if(e.target.closest&&e.target.closest('input,textarea')) return;
+  const t=e.target;
+  if(t.closest&&t.closest('input,textarea,select')) return;
+  if(t.closest&&t.closest('button')&&t!==$('drawBtn')&&(e.key===' '||e.key==='Enter')) return;
   if(e.key===' '||e.key==='Enter'){e.preventDefault(); draw();}
   else if(e.key==='f'||e.key==='F') toggleFs();
-  else if(e.key==='h'||e.key==='H') $('drawer').classList.toggle('open');
-  else if(e.key==='Escape') $('drawer').classList.remove('open');
+  else if(e.key==='h'||e.key==='H') openDrawer('histDrawer');
+  else if(e.key==='s'||e.key==='S') openDrawer('setDrawer');
+  else if(e.key==='Escape') closeDrawers();
 });
 window.addEventListener('resize',()=>{resizeFx(); layout();});
 
