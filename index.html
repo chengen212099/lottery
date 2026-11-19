@@ -99,6 +99,9 @@ input[type=range]{width:100%;accent-color:var(--gold2)}
 .rangeRow b{color:var(--gold)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
 .addRow{display:grid;grid-template-columns:6rem 1fr auto;gap:.5rem}
+.pwRow{display:grid;grid-template-columns:1fr auto;gap:.5rem;margin-top:.5rem}
+input[type=password]{width:100%;font:inherit;font-size:1rem;padding:.45rem .6rem;border-radius:.5rem;border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--text)}
+.ok{color:#a8f0a8}
 .check{display:flex;align-items:center;gap:.5rem;margin:.6rem 0;font-size:1rem;cursor:pointer}
 .check input{width:1.2rem;height:1.2rem}
 .hint{font-size:.85rem;color:var(--muted);margin-top:.3rem;line-height:1.5}
@@ -167,6 +170,18 @@ details summary{cursor:pointer;color:var(--muted);margin:.5rem 0}
     <section class="set">
       <h3>抽獎名單</h3>
       <div id="rosterStatus" class="box"></div>
+
+      <div class="box">
+        <b>輸入密碼載入名單</b>
+        <div class="hint">讀取和網頁放在一起的加密名單檔 roster.json（不需要選檔案）。</div>
+        <div class="pwRow">
+          <input type="password" id="loadPw" placeholder="名單密碼" autocomplete="off">
+          <button class="btn gold" id="loadBtn">載入</button>
+        </div>
+        <label class="check"><input type="checkbox" id="showPw">顯示密碼</label>
+        <div id="loadMsg" class="hint"></div>
+      </div>
+
       <div class="btnRow">
         <button class="btn gold" id="importBtn">匯入 Excel / CSV</button>
         <input type="file" id="fileIn" accept=".xlsx,.xls,.csv,.txt" hidden>
@@ -179,6 +194,15 @@ details summary{cursor:pointer;color:var(--muted);margin:.5rem 0}
         <summary>或：直接貼上名單</summary>
         <textarea id="pasteIn" rows="5" placeholder="每行一位：編號 姓名&#10;001 王小明&#10;002 李小華&#10;（可直接從 Excel 選取兩欄複製貼上）"></textarea>
         <div class="btnRow"><button class="btn" id="pasteBtn">用貼上的內容取代名單</button></div>
+      </details>
+
+      <details id="expBox">
+        <summary>產生加密名單檔（給沒辦法選檔案的裝置用）</summary>
+        <div class="hint">用目前的名單產生 roster.json，上傳到 GitHub 和 index.html 放在一起。其他裝置在上方輸入密碼就能載入。沒有密碼的人打不開。</div>
+        <div class="field"><input type="password" id="expPw" placeholder="設定密碼（至少 8 個字）" autocomplete="new-password"></div>
+        <div class="field"><input type="password" id="expPw2" placeholder="再輸入一次密碼" autocomplete="new-password"></div>
+        <div class="btnRow"><button class="btn gold" id="expBtn">產生並下載 roster.json</button></div>
+        <div id="expMsg" class="hint"></div>
       </details>
 
       <div class="field">
@@ -605,6 +629,73 @@ function applyRoster(items,src){
   save(); syncForm(); render(); showIdle(); toast('已匯入 '+items.length+' 人');
   return true;
 }
+/* ---------- 加密名單檔（PBKDF2 + AES-GCM） ---------- */
+const ROSTER_FILE='roster.json', KDF_ITER=300000;
+function b64(u8){let s=''; for(let i=0;i<u8.length;i+=0x8000) s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000)); return btoa(s);}
+function unb64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0));}
+function needSubtle(){
+  if(!(window.crypto&&crypto.subtle)) throw new Error('這個瀏覽器不支援加解密，請用 https 網址（GitHub Pages）開啟');
+}
+async function deriveKey(pw,salt,iter){
+  const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:iter,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function encryptRoster(pw){
+  needSubtle();
+  const salt=crypto.getRandomValues(new Uint8Array(16)), iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await deriveKey(pw,salt,KDF_ITER);
+  const plain=new TextEncoder().encode(JSON.stringify({roster:S.roster,src:S.rosterSrc,created:Date.now()}));
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,plain));
+  return {format:'weiya-roster',v:1,kdf:'PBKDF2-SHA256',iter:KDF_ITER,salt:b64(salt),iv:b64(iv),data:b64(ct)};
+}
+async function decryptRoster(obj,pw){
+  needSubtle();
+  if(!obj||obj.format!=='weiya-roster') throw new Error('roster.json 格式不正確');
+  const key=await deriveKey(pw,unb64(obj.salt),obj.iter||KDF_ITER);
+  let plain;
+  try{plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(obj.iv)},key,unb64(obj.data));}
+  catch(e){throw new Error('密碼錯誤');}
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+$('showPw').onchange=()=>{$('loadPw').type=$('showPw').checked?'text':'password';};
+$('loadPw').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault(); $('loadBtn').click();}});
+$('loadBtn').onclick=async()=>{
+  const pw=$('loadPw').value, msg=$('loadMsg');
+  if(!pw){msg.innerHTML='<span class="err">請輸入密碼</span>'; return;}
+  $('loadBtn').disabled=true; msg.textContent='讀取中…';
+  try{
+    let res;
+    try{res=await fetch(ROSTER_FILE+'?t='+Date.now(),{cache:'no-store'});}
+    catch(e){throw new Error('無法連線讀取 '+ROSTER_FILE+'，請確認網路，並用 GitHub Pages 網址開啟');}
+    if(!res.ok) throw new Error(res.status===404?'網站上找不到 '+ROSTER_FILE+'，請確認已上傳到 GitHub':'讀取失敗（'+res.status+'）');
+    const obj=await res.json();
+    msg.textContent='解密中…（可能需要幾秒）';
+    const data=await decryptRoster(obj,pw);
+    const items=(data.roster||[]).filter(r=>r&&Number.isFinite(r.n)).map(r=>({n:r.n,name:String(r.name||''),w:r.w||0,manual:!!r.manual}));
+    const when=data.created?new Date(data.created).toLocaleString('zh-TW',{hour12:false}):'';
+    if(applyRoster(items,'加密名單檔'+(data.src?'（'+data.src+'）':'')+(when?' '+when:''))){
+      $('loadPw').value=''; msg.innerHTML='<span class="ok">已載入 '+items.length+' 人</span>';
+    }else msg.textContent='';
+  }catch(e){msg.innerHTML='<span class="err">'+esc(e.message||e)+'</span>';}
+  finally{$('loadBtn').disabled=false;}
+};
+$('expBtn').onclick=async()=>{
+  const pw=$('expPw').value, pw2=$('expPw2').value, msg=$('expMsg');
+  if(!rosterMode()){msg.innerHTML='<span class="err">請先匯入名單</span>'; return;}
+  if(pw.length<8){msg.innerHTML='<span class="err">密碼至少 8 個字</span>'; return;}
+  if(pw!==pw2){msg.innerHTML='<span class="err">兩次輸入的密碼不一樣</span>'; return;}
+  $('expBtn').disabled=true; msg.textContent='加密中…';
+  try{
+    const obj=await encryptRoster(pw);
+    const url=URL.createObjectURL(new Blob([JSON.stringify(obj)],{type:'application/json'}));
+    const a=document.createElement('a'); a.href=url; a.download=ROSTER_FILE; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+    $('expPw').value=''; $('expPw2').value='';
+    msg.innerHTML='<span class="ok">已下載 roster.json（'+S.roster.length+' 人）。請上傳到 GitHub，和 index.html 放在同一層。</span>';
+  }catch(e){msg.innerHTML='<span class="err">'+esc(e.message||e)+'</span>';}
+  finally{$('expBtn').disabled=false;}
+};
+
 let impCands=[];
 async function onFile(file){
   const box=$('impRes'); box.innerHTML='<div class="box">讀取中…</div>';
@@ -646,6 +737,7 @@ function renderSettingsInfo(){
   const rm=rosterMode();
   $('rangeBox').style.display=rm?'none':'';
   $('clearRosterBtn').style.display=rm?'':'none';
+  $('expBox').style.display=rm?'':'none';
   $('rosterStatus').innerHTML=rm?
     '目前名單：<b>'+S.roster.length+'</b> 人'+(S.rosterSrc?'<div class="hint">來源：'+esc(S.rosterSrc)+'</div>':''):
     '目前沒有名單，以號碼範圍 <b>'+S.min+'～'+S.max+'</b> 抽獎';
